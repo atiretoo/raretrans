@@ -22,6 +22,7 @@ library(tidyverse)
 library(popbio)
 library(popdemo)
 library(huxtable)
+library(furrr)
 
 # Raymond's theme modifications
 rlt_theme <- theme(axis.title.y = element_text(colour="grey20",size=15,face="bold"),
@@ -63,10 +64,15 @@ projection_matrix(df, stage = "stage", fate = "fate", fertility = "Sd")
 ```
 OK, so seems to work with the modified `projection_matrix`. Now we
 generate a number of samples to work with, calculating some 
-matrix statistics along the way.
+matrix statistics along the way. I'll ignore seeds, using the `add` argument to boot_transitions, and inserting a `(0.5, 0.1, 0.01, 0.39)` prior for the Bayesian version.
+
+
+
 
 ```{r, warning=FALSE}
-results <- tibble(observations = map(1:100, function(x)sim_observations(TF, N = 100)),
+add_Sd <- c(1,1, TF$T[1,1], 2, 1, TF$T[2,1], 3, 1, TF$T[3,1])
+prior_Sd <- c(0.5, 0.1, 0.01, 0.39)
+results <- tibble(observations = map(1:100, function(x)sim_observations(TF, N = 100, initial_stages = c(0, 1, 1, 1, 1, 1, 1, 1))),
        TF = map(observations, projection_matrix, fertility = "Sd", TF = TRUE),
        N = map(observations, get_state_vector),
        Tunif = map2(TF, N, fill_transitions),
@@ -93,66 +99,56 @@ for stages known to reproduce, and these will be set close to zero.
 
 ```{r}
 set.seed(9347905)
-transition_prior <- rbind(TF$T > 0, rep(1, times = ncol(TF$T)))
-column_sums <- apply(transition_prior, 2, sum)
-transition_prior <- sweep(transition_prior, 2, column_sums, `/` )
+true_lambda <- lambda(TF$T + TF$F)
+add_Sd <- c(1,1, TF$T[1,1], 2, 1, TF$T[2,1], 3, 1, TF$T[3,1])
+transition_prior1 <- rbind(TF$T > 0, rep(1, times = ncol(TF$T)))
+column_sums <- apply(transition_prior1, 2, sum)
+transition_prior1 <- sweep(transition_prior1, 2, column_sums, `/` )
 fertility_alpha <- TF$F * 0
 fertility_alpha[1, 3:8] <- 1e-5
 fertility_beta <- TF$F * 0 + (1-1e-5) # to keep sum = 1 
-results <- tibble(observations = map(1:100, function(x)sim_observations(TF, N = 100)),
-       TF = map(observations, projection_matrix, fertility = "Sd", TF = TRUE),
+results <- tibble(observations = map(1:100, function(x)sim_observations(TF, N = 100, initial_stages = c(0, 1, 1, 1, 1, 1, 1, 1))),
+       TF = map(observations, projection_matrix, fertility = "Sd", TF = TRUE, add = add_Sd),
        N = map(observations, get_state_vector),
-       Tunif = map2(TF, N, fill_transitions, P = transition_prior),
+       Tunif = map2(TF, N, fill_transitions, P = transition_prior1),
        Funif = map2(TF, N, fill_fertility, alpha = fertility_alpha, beta = fertility_beta),
        A = map(TF, ~.x$T+.x$F),
        Aunif = map2(Tunif, Funif, ~.x + .y)) %>% 
   mutate(lambdaraw = map_dbl(A, lambda),
-         bootraw = map(observations, boot.transitions, iterations = 1000),
+         bootraw = map(observations, boot_transitions, iterations = 1000, add = add_Sd),
          lci_raw = map_dbl(bootraw, ~quantile(.$lambda, p = 0.025)),
          uci_raw = map_dbl(bootraw, ~quantile(.$lambda, p = 0.975)),
          lambdaunif = map_dbl(Aunif, lambda))
-ggplot(data = results) + 
-  geom_point(mapping = aes(x = lambdaraw, y = lambdaunif)) + 
-  geom_hline(yintercept = lambda(TF$T + TF$F)) + 
-  geom_errorbarh(mapping = aes(xmin = lci_raw, xmax = uci_raw, y = lambdaunif))
-```
+results <- mutate(results,
+                  goodci = lci_raw < true_lambda & uci_raw > true_lambda,
+                  sensibleci = lci_raw < lambdaraw & uci_raw > lambdaraw)
 
-OK, that looks shit. Bootstrapping from problematic matrices leads to non-sensical confidence limits?
 
-```{r}
 ggplot(data = results) +
-  geom_point(mapping = aes(x = 1:100, y = lambdaraw)) + 
-  geom_errorbar(mapping = aes(x = 1:100, ymin = lci_raw, ymax = uci_raw))
+  geom_point(mapping = aes(x = 1:100, y = lambdaraw, color = goodci)) + 
+  geom_errorbar(mapping = aes(x = 1:100, ymin = lci_raw, ymax = uci_raw, color = goodci))+
+  geom_hline(yintercept = lambda(TF$T + TF$F), linetype = 2, color = "blue")
 ```
+So in many cases the observed lambda is on the edge of the interval, but at 
+they are all at least "inside" now that I'm using the correct version of 
+`projection_matrix` in the bootstrap.
 
-Ok, I want to look carefully at the bootstrapping results for matrix 3, which is one of the ones where it is non-sensical.
-
-```{r}
-testdata <- results$observations[[13]]
-testboot <- boot.transitions(testdata, iterations = 10000)
-quantile(testboot$lambda, p = c(0, 0.025, 0.975, 1))
-results$lambdaraw[[13]]
-```
-
-So it is just really bad. The only CI that make sense are the ones where the observed lambda is > 1. 
-
-
-What about a larger sample size, and only plants > 1 year old?
+What about a larger sample size and assuming knowledge of the seed stage transitions?
 
 ```{r}
 set.seed(384768697)
-initial_stages <- c(1, 1, 1, 1, 1, 1, 1, 1)
+initial_stages <- c(0, 1, 1, 1, 1, 1, 1, 1)
 true_lambda <- lambda(TF$T + TF$F)
 results <- tibble(observations = map(1:100, 
                                      function(x) sim_observations(TF, N = 500, initial_stages = initial_stages)),
-       TF = map(observations, projection_matrix, fertility = "Sd", TF = TRUE),
+       TF = map(observations, projection_matrix, fertility = "Sd", TF = TRUE, add = add_Sd),
        N = map(observations, get_state_vector),
-       Tunif = map2(TF, N, fill_transitions, P = transition_prior),
+       Tunif = map2(TF, N, fill_transitions, P = transition_prior1),
        Funif = map2(TF, N, fill_fertility, alpha = fertility_alpha, beta = fertility_beta),
        A = map(TF, ~.x$T+.x$F),
        Aunif = map2(Tunif, Funif, ~.x + .y)) %>% 
   mutate(lambdaraw = map_dbl(A, lambda),
-         bootraw = map(observations, boot.transitions, iterations = 1000),
+         bootraw = map(observations, boot_transitions, iterations = 1000, add = add_Sd),
          lci_raw = map_dbl(bootraw, ~quantile(.$lambda, p = 0.025)),
          uci_raw = map_dbl(bootraw, ~quantile(.$lambda, p = 0.975)),
          lambdaunif = map_dbl(Aunif, lambda))
@@ -163,21 +159,20 @@ ggplot(data = results) +
   geom_point(mapping = aes(x = 1:100, y = lambdaraw)) + 
   geom_errorbar(mapping = aes(x = 1:100, ymin = lci_raw, ymax = uci_raw,
                               color = goodci)) +
-  geom_hline(yintercept = lambda(TF$T + TF$F), linetype = 2, color = "blue")
+  geom_hline(yintercept = lambda(TF$T + TF$F), linetype = 2, color = "blue")+
+  scale_color_manual(values=c("FALSE" = "#F8766D", "TRUE" = "#00BA38"))
 ```
 
-With a sample of 500 individuals only `r sum(results$goodci)` intervals
+With a sample of 500 individuals `r sum(results$goodci)` intervals
 include the true population growth rate. Indeed, only `r sum(results$sensibleci)`
 intervals even include the observed growth rate. 
-
-To ensure this is not an artifact -- simulate observations from a "good" matrix and calculate bootstrap intervals. 
 
 ## Intervals from Bayesian posterior
 
 ```{r}
 results <- results %>% 
   mutate(sim_TF = map2(TF, N, function(.x, .y) sim_transitions(TF = .x, 
-                      N = .y, P = transition_prior, 
+                      N = .y, P = transition_prior1, 
                       alpha = fertility_alpha, beta = fertility_beta, 
                       samples = 1000)))
 results <- results %>% 
@@ -190,20 +185,212 @@ ggplot(data = results) +
   geom_point(mapping = aes(x = 1:100, y = lambdaunif)) + 
   geom_errorbar(mapping = aes(x = 1:100, ymin = sim_lci, ymax = sim_uci,
                               color = good_sci)) +
-  geom_hline(yintercept = lambda(TF$T + TF$F), linetype = 2, color = "blue")
+  geom_hline(yintercept = lambda(TF$T + TF$F), linetype = 2, color = "blue")+
+  scale_color_manual(values=c("FALSE" = "#F8766D", "TRUE" = "#00BA38"))
 ```
 
-So the coverage property of the posterior credible interval is much better. Moreover,
-`r sum(results$sensible_sci)` out of 100 intervals are sensible in the sense that
-the estimate from the observed data is inside the credible interval.
+The coverage property is terrible, and the estimated lambdas are very biased. However, we have not used all the information that was available to the bootstrap -- the prior for seedling transitions was uniform over the possible transitions. What if we switch to a more 
+informative prior on seedling transitions? 
 
-What about relative width of the intervals?
+```{r}
+transition_prior2 <- transition_prior1
+prior_Sd <- c(0.5, 0.1, 0.01, 0.39)
+transition_prior2[c(1:3, 9), 1] <- prior_Sd
+results2 <- results %>% 
+  mutate(sim_TF = map2(TF, N, function(.x, .y) sim_transitions(TF = .x, 
+                      N = .y, P = transition_prior2, 
+                      alpha = fertility_alpha, beta = fertility_beta, 
+                      samples = 1000)))
+results <- results %>% 
+  mutate(sim_lambdas = map(sim_TF, function(ll) map_dbl(ll, lambda)),
+         sim_lci = map_dbl(sim_lambdas, quantile, p = 0.025),
+         sim_uci = map_dbl(sim_lambdas, quantile, p = 0.975),
+         good_sci = sim_lci < true_lambda & sim_uci > true_lambda,
+         sensible_sci = sim_lci < lambdaunif & sim_uci > lambdaunif)
+ggplot(data = results) +
+  geom_point(mapping = aes(x = 1:100, y = lambdaunif)) + 
+  geom_errorbar(mapping = aes(x = 1:100, ymin = sim_lci, ymax = sim_uci,
+                              color = good_sci)) +
+  geom_hline(yintercept = lambda(TF$T + TF$F), linetype = 2, color = "blue")+
+  scale_color_manual(values=c("FALSE" = "#F8766D", "TRUE" = "#00BA38"))
+```
+
+What about relative width and bias of the intervals versus sample size?
+
+# relative width and bias as a function of sample size
+
+```{r}
+
+data(method_comparison_1)
+
+# transition_prior3 <- transition_prior1
+# prior_Sd <- c(0.5, 0.1, 0.01, 0.39)
+# transition_prior3[c(1:3, 9), 1] <- prior_Sd * 1000
+# 
+# set.seed(817516)
+# bigresults <- tibble(sample_size = seq(50, 500, by = 50),
+#                      observations = map(sample_size, ~map(1:100,
+#                                      function(x) sim_observations(TF, N = .x, initial_stages = initial_stages)))) %>%
+#   unnest(cols = observations) %>%
+#   mutate(
+#        TF = map(observations, projection_matrix, fertility = "Sd", TF = TRUE, add = add_Sd),
+#        N = map(observations, get_state_vector),
+#        A = map(TF, ~.x$T+.x$F),
+#        lambdaraw = map_dbl(A, lambda))
+# 
+# method_comparison_1 <- bigresults %>%
+#   mutate(boot_TF = map(observations, boot_transitions, iterations = 1000, add = add_Sd),
+#          sim_TF = map2(TF, N, function(.x, .y) sim_transitions(TF = .x,
+#                       N = .y, P = transition_prior3,
+#                       alpha = fertility_alpha, beta = fertility_beta,
+#                       samples = 1000)))
+
+bigresults2 <- method_comparison_1 %>% 
+  mutate(boot_lambdas = map(boot_TF, "lambda"),
+         boot_lci = map_dbl(boot_TF, ~quantile(.$lambda, p = 0.025)),
+         boot_uci = map_dbl(boot_TF, ~quantile(.$lambda, p = 0.975)),
+         good_bci = boot_lci < true_lambda & boot_uci > true_lambda,
+         width_bci = (boot_uci - boot_lci) / lambdaraw,
+         mean_bias_bci = map_dbl(boot_lambdas, ~mean(.x - true_lambda)),
+         se_bias_bci = map_dbl(boot_lambdas, ~sd(.x - true_lambda)),
+         sim_lambdas = map(sim_TF, function(ll) map_dbl(ll, lambda)),
+         sim_lci = map_dbl(sim_lambdas, quantile, p = 0.025),
+         sim_uci = map_dbl(sim_lambdas, quantile, p = 0.975),
+         good_sci = sim_lci < true_lambda & sim_uci > true_lambda,
+         width_sci = (sim_uci - sim_lci) / lambdaraw,
+         mean_bias_sci = map_dbl(sim_lambdas, ~mean(.x - true_lambda)),
+         se_bias_sci = map_dbl(sim_lambdas, ~sd(.x - true_lambda)))
+
+figure_results <- bigresults2 %>% 
+  group_by(sample_size) %>% 
+  summarize(cover_boot = sum(good_bci),
+            width_boot = mean(width_bci),
+            width.lci_boot = quantile(width_bci, p = 0.025), 
+            width.uci_boot = quantile(width_bci, p = 0.975), 
+            bias_boot = mean(mean_bias_bci/true_lambda),
+            bias.lci_boot = quantile(mean_bias_bci/true_lambda, p = 0.025), 
+            bias.uci_boot = quantile(mean_bias_bci/true_lambda, p = 0.975), 
+            cover_sim = sum(good_sci),
+            width_sim = mean(width_sci),
+            width.lci_sim = quantile(width_sci, p = 0.025), 
+            width.uci_sim = quantile(width_sci, p = 0.975), 
+            bias_sim = mean(mean_bias_sci),
+            bias.lci_sim = quantile(mean_bias_sci/true_lambda, p = 0.025), 
+            bias.uci_sim = quantile(mean_bias_sci/true_lambda, p = 0.975)) %>% 
+  pivot_longer(cols = -1, 
+              names_to = c(".value", "method"),
+              names_sep = "_")
+
+egg::ggarrange(
+  ggplot(figure_results) + 
+  geom_point(mapping = aes(x = sample_size, y = width, color = method)) + 
+  geom_line(mapping = aes(x = sample_size, y = width, color = method)) + 
+  geom_ribbon(mapping = aes(x = sample_size, ymin = width.lci, ymax = width.uci, fill = method), alpha = 0.1),
+  ggplot(figure_results) + 
+  geom_point(mapping = aes(x = sample_size, y = bias, color = method)) + 
+  geom_line(mapping = aes(x = sample_size, y = bias, color = method)) + 
+  geom_ribbon(mapping = aes(x = sample_size, ymin = bias.lci, ymax = bias.uci, fill = method), alpha = 0.1))
+```
+
+So when we provide the Bayesian method with a strong and accurate prior on the seedling transitions, as is assumed with the bootstrap, the Bayesian method
+performs slightly better at small sample sizes than the non-parametric bootstrap. This means that the bootstrap with the assumed transitions is overly optimistic 
+about the precision, and potentially biased.
 
 # what about conflicting priors?
 
 One thing that might concern users is if the prior knowledge is incorrect or
 misleading in some way. What are some ways this might happen? Missing possible
-transitions? Including impossible transitions? Getting
+transitions? Including impossible transitions? We rerun the simulations above
+with two different possible errors in the prior information. First, we will 
+use the weak prior on seedling transitions. In the second scenario we set to zero all 
+prior transitions with probabilities smaller than 0.01, and perturb 
+all other positive matrix entries by up to 25 or 50%. We compare both of these against the Bayesian method with accurate but uninformative priors on most transitions,
+and accurate and strong priors on seedling transitions (closest to the bootstrap).
+
+```{r}
+
+#data(method_comparison_2)
+
+transition_prior4 <- TF$T 
+transition_prior4[TF$T < 0.01] <- 0
+transition_prior4 <- transition_prior4 * 1.25 # 25% increase on priors
+column_sums <- apply(transition_prior4, 2, sum)
+transition_prior4[,column_sums > 1] <- sweep(transition_prior4[,column_sums > 1], 2, 
+                                             column_sums[column_sums > 1], `/`)
+column_sums <- apply(transition_prior4, 2, sum)
+transition_prior4 <- rbind(transition_prior4, 1 - column_sums)
+
+
+set.seed(449535)
+plan("multisession", workers = 4)
+bigresults <- tibble(sample_size = seq(50, 500, by = 50),
+                     observations = future_map(sample_size, ~map(1:100,
+                                     function(x) sim_observations(TF, N = .x,
+                                                                  initial_stages = initial_stages)))) %>%
+  unnest(cols = observations) %>%
+  mutate(
+       TF = map(observations, projection_matrix, fertility = "Sd", TF = TRUE, add = add_Sd),
+       N = map(observations, get_state_vector),
+       A = map(TF, ~.x$T+.x$F),
+       lambdaraw = map_dbl(A, lambda))
+
+method_comparison_2 <- bigresults %>%
+  mutate(sim2_TF = map2(TF, N, function(.x, .y) sim_transitions(TF = .x,
+                      N = .y, P = transition_prior1,
+                      alpha = fertility_alpha, beta = fertility_beta,
+                      samples = 1000)),
+         sim3_TF = map2(TF, N, function(.x, .y) sim_transitions(TF = .x,
+                      N = .y, P = transition_prior4,
+                      alpha = fertility_alpha, beta = fertility_beta,
+                      samples = 1000)))
+
+bigresults2 <- method_comparison_2 %>% 
+  mutate(boot_lambdas = map(boot_TF, "lambda"),
+         boot_lci = map_dbl(boot_TF, ~quantile(.$lambda, p = 0.025)),
+         boot_uci = map_dbl(boot_TF, ~quantile(.$lambda, p = 0.975)),
+         good_bci = boot_lci < true_lambda & boot_uci > true_lambda,
+         width_bci = (boot_uci - boot_lci) / lambdaraw,
+         mean_bias_bci = map_dbl(boot_lambdas, ~mean(.x - true_lambda)),
+         se_bias_bci = map_dbl(boot_lambdas, ~sd(.x - true_lambda)),
+         sim_lambdas = map(sim_TF, function(ll) map_dbl(ll, lambda)),
+         sim_lci = map_dbl(sim_lambdas, quantile, p = 0.025),
+         sim_uci = map_dbl(sim_lambdas, quantile, p = 0.975),
+         good_sci = sim_lci < true_lambda & sim_uci > true_lambda,
+         width_sci = (sim_uci - sim_lci) / lambdaraw,
+         mean_bias_sci = map_dbl(sim_lambdas, ~mean(.x - true_lambda)),
+         se_bias_sci = map_dbl(sim_lambdas, ~sd(.x - true_lambda)))
+
+figure_results <- bigresults2 %>% 
+  group_by(sample_size) %>% 
+  summarize(cover_boot = sum(good_bci),
+            width_boot = mean(width_bci),
+            width.lci_boot = quantile(width_bci, p = 0.025), 
+            width.uci_boot = quantile(width_bci, p = 0.975), 
+            bias_boot = mean(mean_bias_bci/true_lambda),
+            bias.lci_boot = quantile(mean_bias_bci/true_lambda, p = 0.025), 
+            bias.uci_boot = quantile(mean_bias_bci/true_lambda, p = 0.975), 
+            cover_sim = sum(good_sci),
+            width_sim = mean(width_sci),
+            width.lci_sim = quantile(width_sci, p = 0.025), 
+            width.uci_sim = quantile(width_sci, p = 0.975), 
+            bias_sim = mean(mean_bias_sci),
+            bias.lci_sim = quantile(mean_bias_sci/true_lambda, p = 0.025), 
+            bias.uci_sim = quantile(mean_bias_sci/true_lambda, p = 0.975)) %>% 
+  pivot_longer(cols = -1, 
+              names_to = c(".value", "method"),
+              names_sep = "_")
+
+egg::ggarrange(
+  ggplot(figure_results) + 
+  geom_point(mapping = aes(x = sample_size, y = width, color = method)) + 
+  geom_line(mapping = aes(x = sample_size, y = width, color = method)) + 
+  geom_ribbon(mapping = aes(x = sample_size, ymin = width.lci, ymax = width.uci, fill = method), alpha = 0.1),
+  ggplot(figure_results) + 
+  geom_point(mapping = aes(x = sample_size, y = bias, color = method)) + 
+  geom_line(mapping = aes(x = sample_size, y = bias, color = method)) + 
+  geom_ribbon(mapping = aes(x = sample_size, ymin = bias.lci, ymax = bias.uci, fill = method), alpha = 0.1))
+```
+
 
 
 # What about a different sampling strategy? 
@@ -226,7 +413,7 @@ results <- tibble(observations = map(1:100,
        A = map(TF, ~.x$T+.x$F),
        Aunif = map2(Tunif, Funif, ~.x + .y)) %>% 
   mutate(lambdaraw = map_dbl(A, lambda),
-         bootraw = map(observations, boot.transitions, iterations = 1000),
+         bootraw = map(observations, boot_transitions, iterations = 1000),
          lci_raw = map_dbl(bootraw, ~quantile(.$lambda, p = 0.025)),
          uci_raw = map_dbl(bootraw, ~quantile(.$lambda, p = 0.975)),
          lambdaunif = map_dbl(Aunif, lambda))
@@ -240,7 +427,7 @@ ggplot(data = results) +
   geom_hline(yintercept = lambda(TF$T + TF$F), linetype = 2, color = "blue")
 ```
 
-The bootstrapped intervals are even worse!! How about the Bayesian approach with
+ How about the Bayesian approach with
 oversampled data?
 
 
@@ -264,7 +451,46 @@ ggplot(data = results) +
   geom_hline(yintercept = lambda(TF$T + TF$F), linetype = 2, color = "blue")
 ```
 
-These are still much better. 
+
+
+# Desert Tortoise
+
+Doak et al. (1994) published four matrices for desert tortoise (*Gopherus agassizii*). 
+These matrices have entries with relatively large values for all entries, except for the transition from adult1 to adult2, which is ~0.02.
+We will try the bootstrap CI on these matrices.
+
+```{r}
+TF <- splitA(tortoise[["high"]])
+set.seed(837563)
+transition_prior <- rbind(TF$T > 0, rep(1, times = ncol(TF$T)))
+column_sums <- apply(transition_prior, 2, sum)
+transition_prior <- sweep(transition_prior, 2, column_sums, `/` )
+fertility_alpha <- TF$F * 0
+fertility_alpha[1, 6:8] <- 1e-5
+fertility_beta <- TF$F * 0 + (1-1e-5) # to keep sum = 1 
+results <- tibble(observations = map(1:100, function(x)sim_observations(TF, N = 500)),
+       TF = map(observations, projection_matrix, fertility = "yearling", TF = TRUE),
+       N = map(observations, get_state_vector),
+       Tunif = map2(TF, N, fill_transitions, P = transition_prior),
+       Funif = map2(TF, N, fill_fertility, alpha = fertility_alpha, beta = fertility_beta),
+       A = map(TF, ~.x$T+.x$F),
+       Aunif = map2(Tunif, Funif, ~.x + .y)) %>% 
+  mutate(lambdaraw = map_dbl(A, lambda),
+         bootraw = map(observations, boot_transitions, iterations = 1000, by.stage.counts = TRUE, fertility = "yearling"),
+         lci_raw = map_dbl(bootraw, ~quantile(.$lambda, p = 0.025)),
+         uci_raw = map_dbl(bootraw, ~quantile(.$lambda, p = 0.975)),
+         lambdaunif = map_dbl(Aunif, lambda))
+
+results$A
+stable.stage(tortoise[["high"]])
+all.sims <- bind_rows(results$observations)
+
+ggplot(data = results) + 
+  geom_point(mapping = aes(x = lambdaraw, y = lambdaunif)) + 
+  geom_hline(yintercept = lambda(TF$T + TF$F)) + 
+  geom_errorbarh(mapping = aes(xmin = lci_raw, xmax = uci_raw, y = lambdaunif))
+```
+
 
 # Caveats
 
