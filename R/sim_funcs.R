@@ -100,7 +100,7 @@ sim_observations <- function(TF, N = 100, initial_stages = NULL){
   Fmat <- TF$F
   order <- dim(Tmat)[1]
   A <- Tmat + Fmat
-  eigen_results <- eigen.analysis(A)
+  eigen_results <- popbio::eigen.analysis(A)
   # augment Tmat with row for dead
   Tmat2 <- matrix(NA, nrow = order+1, ncol = order)
   Tmat2[1:order, ] <- Tmat
