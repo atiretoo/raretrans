@@ -38,16 +38,16 @@ devtools::install_github("atyre2/raretrans@v1.0.0")
 
 Alternatively, [download a package archive file from the release page](https://github.com/atyre2/raretrans/releases). 
 
-Get the development version from github with:
+The development version has moved to a new repository. Get the development version from github with:
 
 ```{r, eval = FALSE}
 # install.packages("devtools")
-devtools::install_github("atyre2/raretrans")
+devtools::install_github("atiretoo/raretrans")
 ```
 If you want the vignettes, you have to add some additional arguments.
 
 ```{r, eval = FALSE}
-devtools::install_github("atyre2/raretrans", build = TRUE, build_opts = c("--no-resave-data", "--no-manual"))
+devtools::install_github("atiretoo/raretrans", build = TRUE, build_opts = c("--no-resave-data", "--no-manual"))
 ```
 
 ## Overview
