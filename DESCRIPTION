@@ -19,10 +19,13 @@ Authors@R:
       person(given = "Sasha",
              family = "Tenhumberg",
              role = "ctb"))
-Description: Functions to create matrix population models from a
-    combination of data on stage/age transitions and Bayesian prior
-    information. This compensates for structural problems caused by
-    missing observations of rare transitions.
+Description: Functions to fill structural zeros in population projection 
+    matrices using Bayesian priors. Implements the multinomial-Dirichlet 
+    model for transition probabilities and Gamma-Poisson model for 
+    reproduction, as described in Tremblay et al. (2021) 
+    <doi:10.1016/j.ecolmodel.2021.109526>.
+URL: https://atyre2.github.io/raretrans/
+BugReports: https://github.com/atiretoo/raretrans/issues
 License: MIT + file LICENSE
 URL: https://atyre2.github.io/raretrans/,
     https://github.com/atiretoo/raretrans
