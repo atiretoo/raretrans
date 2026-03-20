@@ -3,8 +3,8 @@
 #' This package provides functions that combine data on transitions with prior beliefs about
 #' transition probabilities and fertilities. Includes functions to create matrix population models from a combination
 #' of data on stage/age transitions and Bayesian prior information. This
-#' compensates for structural problems caused by missing observatons of rare
+#' compensates for structural problems caused by missing observations of rare
 #' transitions.
 #'
-#'
+#' @importFrom rlang .data
 "_PACKAGE"

@@ -9,24 +9,24 @@
 This package provides functions that combine data on transitions with prior beliefs about
 transition probabilities and fertilities. Includes functions to create matrix population models from a combination
 of data on stage/age transitions and Bayesian prior information. This
-compensates for structural problems caused by missing observatons of rare
+compensates for structural problems caused by missing observations of rare
 transitions.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://atyre2.github.io/raretrans/}
+  \item \url{https://atiretoo.github.io/raretrans/}
   \item \url{https://github.com/atiretoo/raretrans}
   \item Report bugs at \url{https://github.com/atiretoo/raretrans/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Andrew Tyre \email{atyre2@gmail.com} (\href{https://orcid.org/0000-0001-9736-641X}{ORCID})
+\strong{Maintainer}: Raymond Tremblay \email{raymond.tremblay@upr.edu}
 
 Authors:
 \itemize{
-  \item Raymond Tremblay \email{raymond.tremblay@upr.edu}
+  \item Andrew Tyre \email{atyre2@gmail.com} (\href{https://orcid.org/0000-0001-9736-641X}{ORCID})
   \item Maria-Eglee Perez \email{mariaeglee@gmail.com}
 }
 

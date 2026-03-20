@@ -318,3 +318,11 @@ RLT_0.5_summary <- summarize(RLT_0.5,
 knitr::kable(RLT_0.5_summary, digits = 2)
 ```
 
+
+
+```{r}
+devtools::load_all()
+cri <- transition_CrI(TF, N, stage_names = c("plantula", "juvenile", "adult"))
+plot_transition_CrI(cri)
+```
+

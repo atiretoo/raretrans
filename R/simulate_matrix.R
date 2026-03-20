@@ -9,6 +9,11 @@
 #' @return The function returns a matrix with n rows and \code{length(alpha)} columns
 #' @export
 #'
+#' @examples
+#' # Generate 5 random probability vectors from a Dirichlet(1, 2, 3) distribution
+#' set.seed(42)
+#' rdirichlet(5, c(1, 2, 3))
+#'
 #' @source copied from package \code{MCMCpack} to avoid a dependency. That code
 #' was taken from Greg's Miscellaneous Functions (gregmisc). His code was based
 #' on code posted by Ben Bolker to R-News on 15 Dec 2000.
@@ -36,11 +41,27 @@ rdirichlet <- function(n, alpha) {
 #' @return Always returns a list.
 #' @export
 #'
+#' @examples
+#' # Build a simple 3-stage TF list
+#' T_mat <- matrix(c(0.5, 0.3, 0.0,
+#'                   0.2, 0.4, 0.1,
+#'                   0.0, 0.1, 0.7), nrow = 3, ncol = 3)
+#' F_mat <- matrix(c(0.0, 0.0, 1.5,
+#'                   0.0, 0.0, 0.0,
+#'                   0.0, 0.0, 0.0), nrow = 3, ncol = 3)
+#' TF <- list(T = T_mat, F = F_mat)
+#' N  <- c(10, 5, 8)
+#'
+#' # Simulate 10 population projection matrices using default uninformative priors
+#' set.seed(42)
+#' mats <- sim_transitions(TF, N, samples = 10)
+#' length(mats)   # 10 matrices
+#' mats[[1]]      # first simulated matrix
 sim_transitions <- function(TF, N, P = NULL, alpha = 0.00001, beta = 0.00001, priorweight = -1, samples = 1) {
   Tmat <- TF$T
   Fmat <- TF$F
   order <- dim(Tmat)[1]
-  if (missing(P)) {
+  if (is.null(P)) {
     # fill in with a uniform prior <- <- <-
     P <- matrix(1 / (order + 1), nrow = order + 1, ncol = order)
   } else {

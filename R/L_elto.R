@@ -1,30 +1,75 @@
-#' transition and recruitment data for \emph{L. elto}
+#' Transition and recruitment data for \emph{Lepanthes eltoroensis}
 #'
-#' 6 month periodic census of several populations of the epiphytic Orchid \emph{Lepenthes elto}.
+#' Individual-level census data from multiple populations of the epiphytic
+#' orchid \emph{Lepanthes eltoroensis} Stimson, a critically rare species
+#' endemic to Puerto Rico. Individuals were permanently marked and surveyed
+#' at 6-month intervals over 12 census periods (6 calendar years). Each row
+#' represents one individual observed at one census period.
 #'
+#' Life history stages are coded as follows:
 #' \itemize{
-#'    \item POPNUM...
-#'    \item year...
-#'    \item seedlings...
-#'    \item adults...
-#'    \item fertility...
-#'    \item IND_NUM...
-#'    \item stage...
-#'    \item next_stage...
-#'    \item first_year...
-#'    \item last_year...
-#'    \item recruited...
-#'    \item died...
-#'    \item lifespan...
-#'  }
+#'   \item \code{"p"} - plantula (seedling): individuals without a
+#'     lepanthiform sheet on any of the leaves
+#'   \item \code{"j"} - juvenile: individuals with no evidence of present
+#'     or past reproductive effort; bases of inflorescences are persistent
+#'   \item \code{"a"} - adult: individuals with active or inactive
+#'     inflorescences present
+#'   \item \code{"m"} - muerto (dead): individual was dead at the following
+#'     census (used only in \code{next_stage})
+#' }
+#'
+#' @format A data frame with 5233 rows and 13 variables:
+#' \describe{
+#'   \item{POPNUM}{Integer. Population identifier number.}
+#'   \item{year}{Integer. Census period number (each period represents a
+#'     6-month interval, not a calendar year; periods range from 1 to 12).}
+#'   \item{seedlings}{Numeric. Population-level count of plantulas (seedlings,
+#'     stage \code{"p"}) observed in the population at this census period.
+#'     The same value is repeated for all individuals in the same
+#'     population-period combination.}
+#'   \item{adults}{Numeric. Population-level count of adults (stage \code{"a"})
+#'     observed in the population at this census period. The same value is
+#'     repeated for all individuals in the same population-period combination.}
+#'   \item{fertility}{Numeric. Mean per-individual fertility: average number
+#'     of seedlings produced per adult in the population at this census period.}
+#'   \item{IND_NUM}{Integer. Unique individual plant identifier number within
+#'     its population.}
+#'   \item{stage}{Character. Life history stage of the individual at the
+#'     current census: \code{"p"} (plantula/seedling), \code{"j"} (juvenile),
+#'     or \code{"a"} (adult). See Details for stage definitions.}
+#'   \item{next_stage}{Character. Life history stage of the individual at the
+#'     following 6-month census: \code{"p"}, \code{"j"}, \code{"a"}, or
+#'     \code{"m"} (muerto/dead). See Details for stage definitions.}
+#'   \item{first_year}{Integer. 6-month census period number when the
+#'     individual was first observed (1 = first survey).}
+#'   \item{last_year}{Integer. 6-month census period number when the
+#'     individual was last observed alive.}
+#'   \item{recruited}{Logical. \code{TRUE} if this individual was newly
+#'     recruited into the population (not present at the previous survey),
+#'     typically via sexual reproduction. All individuals at the first census
+#'     period (\code{year == 1}) are \code{TRUE} by definition as there is
+#'     no prior survey for comparison.}
+#'   \item{died}{Logical. Whether the individual was found dead at this
+#'     census period.}
+#'   \item{lifespan}{Integer. Total number of 6-month census periods during
+#'     which the individual was observed alive (not in calendar years).}
+#' }
 #'
 #' @docType data
-#' @keywords ...
+#' @keywords datasets
 #' @name L_elto
 #' @usage data(L_elto)
-#' @format A data frame with 5233 rows and 13 variables
-#' @source Raymond L. Tremblay, University of Puerto Rico, Unpublished data.
-#' @references{
-#' Tremblay, Raymond L., and Michael J. Hutchings. "Population dynamics in orchid conservation: a review of analytical methods based on the rare species Lepanthes eltoroensis." Orchid Conservation, Borneo: Natural History Museum Publications (2003): 183-204.
-#' }
+#' @source Raymond L. Tremblay, University of Puerto Rico at Humacao,
+#'   unpublished data.
+#' @references
+#' Tremblay, R.L. and Hutchings, M.J. (2003). Population dynamics in orchid
+#' conservation: a review of analytical methods based on the rare species
+#' \emph{Lepanthes eltoroensis}. In: Dixon, K.W. et al. (eds.)
+#' \emph{Orchid Conservation}. Natural History Publications (Borneo),
+#' pp. 183--204.
+#'
+#' Tremblay, R.L., Perez, M-E., Tyre, A.J. and Tenhumberg, B. (2021).
+#' Bayesian estimates for matrix population models of rare plants.
+#' \emph{Ecological Modelling}, 440, 109526.
+#' \doi{10.1016/j.ecolmodel.2021.109526}
 "L_elto"

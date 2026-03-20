@@ -18,12 +18,31 @@
 #'
 #' @export
 #'
+#' @examples
+#' # Build a simple 3-stage TF list (transition + fertility matrices)
+#' T_mat <- matrix(c(0.5, 0.3, 0.0,
+#'                   0.2, 0.4, 0.1,
+#'                   0.0, 0.1, 0.7), nrow = 3, ncol = 3)
+#' F_mat <- matrix(c(0.0, 0.0, 1.5,
+#'                   0.0, 0.0, 0.0,
+#'                   0.0, 0.0, 0.0), nrow = 3, ncol = 3)
+#' TF <- list(T = T_mat, F = F_mat)
+#' N  <- c(10, 5, 8)
+#'
+#' # Default: return filled transition matrix T
+#' fill_transitions(TF, N)
+#'
+#' # Return the full population matrix A = T + F
+#' fill_transitions(TF, N, returnType = "A")
+#'
+#' # Use a prior weight equal to the sample size
+#' fill_transitions(TF, N, priorweight = 1)
 fill_transitions <- function(TF, N, P = NULL, priorweight = -1, returnType = "T") {
   check_TF(TF)
   Tmat <- TF$T
   Fmat <- TF$F
   order <- dim(Tmat)[1]
-  if (missing(P)) {
+  if (is.null(P)) {
     # fill in with a uniform prior <- <- <-
     P <- matrix(1 / (order + 1), nrow = order + 1, ncol = order)
   } else {
@@ -79,6 +98,33 @@ fill_transitions <- function(TF, N, P = NULL, priorweight = -1, returnType = "T"
 #'
 #' @export
 #'
+#' @examples
+#' # Build a simple 3-stage TF list (transition + fertility matrices)
+#' T_mat <- matrix(c(0.5, 0.3, 0.0,
+#'                   0.2, 0.4, 0.1,
+#'                   0.0, 0.1, 0.7), nrow = 3, ncol = 3)
+#' F_mat <- matrix(c(0.0, 0.0, 1.5,
+#'                   0.0, 0.0, 0.0,
+#'                   0.0, 0.0, 0.0), nrow = 3, ncol = 3)
+#' TF <- list(T = T_mat, F = F_mat)
+#' N  <- c(10, 5, 8)
+#'
+#' # Only adults (stage 3) reproduce; mark non-reproducing entries with NA
+#' alpha_mat <- matrix(c(NA, NA, 0.5,
+#'                       NA, NA, NA,
+#'                       NA, NA, NA), nrow = 3, ncol = 3)
+#' beta_mat  <- matrix(c(NA, NA, 1.0,
+#'                       NA, NA, NA,
+#'                       NA, NA, NA), nrow = 3, ncol = 3)
+#'
+#' # Default: return filled fertility matrix F
+#' fill_fertility(TF, N, alpha = alpha_mat, beta = beta_mat)
+#'
+#' # Return the full population matrix A = T + F
+#' fill_fertility(TF, N, alpha = alpha_mat, beta = beta_mat, returnType = "A")
+#'
+#' # Return the posterior alpha and beta parameters
+#' fill_fertility(TF, N, alpha = alpha_mat, beta = beta_mat, returnType = "ab")
 fill_fertility <- function(TF, N, alpha = 0.00001, beta = 0.00001, priorweight = -1, returnType = "F") {
   check_TF(TF)
   Tmat <- TF$T
@@ -146,6 +192,15 @@ fill_fertility <- function(TF, N, alpha = 0.00001, beta = 0.00001, priorweight =
 #' @return a vector of the counts of observations in each level of stage.
 #' @export
 #'
+#' @examples
+#' data("L_elto")
+#'
+#' # Extract one population at one census period
+#' onepop <- L_elto[L_elto$POPNUM == 250 & L_elto$year == 5, ]
+#' onepop$stage <- factor(onepop$stage, levels = c("p", "j", "a"))
+#'
+#' # Count individuals per stage in the order p, j, a
+#' get_state_vector(onepop, stage = "stage", sort = c("p", "j", "a"))
 get_state_vector <- function(transitions, stage = NULL,
                              sort = NULL) {
   if (missing(stage)) {
