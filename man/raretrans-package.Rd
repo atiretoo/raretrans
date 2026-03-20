@@ -16,13 +16,13 @@ transitions.
 Useful links:
 \itemize{
   \item \url{https://atyre2.github.io/raretrans/}
-  \item \url{https://github.com/atyre2/raretrans}
-  \item Report bugs at \url{https://github.com/atyre2/raretrans/issues}
+  \item \url{https://github.com/atiretoo/raretrans}
+  \item Report bugs at \url{https://github.com/atiretoo/raretrans/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Andrew Tyre \email{atyre2@unl.edu} (\href{https://orcid.org/0000-0001-9736-641X}{ORCID})
+\strong{Maintainer}: Andrew Tyre \email{atyre2@gmail.com} (\href{https://orcid.org/0000-0001-9736-641X}{ORCID})
 
 Authors:
 \itemize{

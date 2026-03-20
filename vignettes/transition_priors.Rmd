@@ -509,9 +509,9 @@ params <- group_by(params, prior) %>%
          a = a_obs + a_prior,
          b = b_obs + b_prior,
          lowerci = qbeta(0.025, a, b),
-         median = paste0("median=",format(qbeta(0.5, a, b),digits=0,nsmall=3)),
+         median = paste0("median=",format(qbeta(0.5, a, b),digits=1,nsmall=3)),
          upperci = qbeta(0.975, a, b),
-         expected = paste0("mean=",format(a / (a+b), digits=0, nsmall=3)),
+         expected = paste0("mean=",format(a / (a+b), digits=1, nsmall=3)),
          x = 0.9, y=12) %>%
   ungroup()
 
