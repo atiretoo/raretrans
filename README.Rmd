@@ -3,7 +3,6 @@ output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -14,65 +13,81 @@ knitr::opts_chunk$set(
 
 # raretrans
 
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-[![Build Status](https://travis-ci.com/atyre2/raretrans.svg?token=fZ6v1nEUhWRrRW3uj9TH&branch=master)](https://travis-ci.com/atyre2/raretrans)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/atyre2/raretrans?branch=master&svg=true)](https://ci.appveyor.com/project/atyre2/raretrans)
-[![codecov](https://codecov.io/gh/atyre2/raretrans/branch/master/graph/badge.svg?token=NWFl8m4owW)](https://codecov.io/gh/atyre2/raretrans)
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/raretrans)](https://cran.r-project.org/package=raretrans)
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![R-CMD-check](https://github.com/atiretoo/raretrans/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/atiretoo/raretrans/actions/workflows/R-CMD-check.yaml)
+[![codecov](https://codecov.io/gh/atiretoo/raretrans/branch/master/graph/badge.svg)](https://codecov.io/gh/atiretoo/raretrans)
 
-Functions to create matrix population models from a combination
-    of data on stage/age transitions and Bayesian prior information. This 
-    compensates for structural problems caused by missing observatons of rare
-    transitions. 
+Functions to create matrix population models from a combination of data
+on stage/age transitions and Bayesian prior information. This compensates
+for structural problems caused by missing observations of rare transitions
+("holey matrices").
+
+Based on methods described in:
+
+> Tremblay, R. L., Tyre, A. J., Pérez, M.-E., & Ackerman, J. D. (2021).
+> Population projections from holey matrices: Using prior information to
+> estimate rare transition events. *Ecological Modelling*, **447**, 109526.
+> <https://doi.org/10.1016/j.ecolmodel.2021.109526>
 
 ## Installation
 
-raretrans is not currently available from CRAN, but you can install from github.
-
-Code and data used to produce Raymond L. Tremblay, Andrew J. Tyre , Maria-Eglée Pérez, James D. Ackerman (in review) Population projections from holey matrices: Using prior information to estimate rare transition events is tagged v1.0.0, so:
-
-```{r, eval = FALSE}
-# install.packages("devtools") # if needed
-devtools::install_github("atyre2/raretrans@v1.0.0")
-```
-
-Alternatively, [download a package archive file from the release page](https://github.com/atyre2/raretrans/releases). 
-
-The development version has moved to a new repository. Get the development version from github with:
-
+`raretrans` is not currently available from CRAN. Install the development
+version from GitHub with:
 ```{r, eval = FALSE}
 # install.packages("devtools")
 devtools::install_github("atiretoo/raretrans")
 ```
-If you want the vignettes, you have to add some additional arguments.
 
+To install with vignettes:
 ```{r, eval = FALSE}
-devtools::install_github("atiretoo/raretrans", build = TRUE, build_opts = c("--no-resave-data", "--no-manual"))
+devtools::install_github("atiretoo/raretrans", build_vignettes = TRUE)
+```
+
+The code and data used to produce the published paper are tagged `v1.0.0`:
+```{r, eval = FALSE}
+devtools::install_github("atiretoo/raretrans@v1.0.0")
 ```
 
 ## Overview
 
-There are two main functions in this package, `fill_transitions()` and `fill_fertility()`.
-Both of them take a list of two matrices as their first argument, the population 
-projection matrix decomposed into a matrix of the probability of transitions
-between stages, and a matrix describing the contribution to the next census via
-reproduction. These matrices can be constructed by hand, or created with 
-`popbio::projection_matrix(..., TF = TRUE)` from a data frame with transitions
-between stages for individuals. By default, they return a matrix 'filled in' with 
-uninformative or uniform priors. Informative priors can be specified as well.
+The main functions in this package are:
 
-For detailed examples of using these functions with a single population see the
-vignette [Working with a single population and transition](https://atyre2.github.io/raretrans/articles/onepopperiod.html).
-The vignette [Effect of prior information on transition probabilities and fertilities](https://atyre2.github.io/raretrans/articles/transition_priors.html) 
-shows how to work with a dataset of many populations and transitions, and 
-produces all the figures for Tremblay et al. (submitted). 
+| Function | Purpose |
+|---|---|
+| `fill_transitions()` | Fill a transition matrix using a Dirichlet-multinomial prior |
+| `fill_fertility()` | Fill a fertility matrix using a Gamma prior |
+| `sim_transitions()` | Simulate posterior transition matrices |
+| `transition_CrI()` | Compute credible intervals for all transition probabilities |
+| `plot_transition_CrI()` | Visualise posterior means and credible intervals |
+| `plot_transition_density()` | Visualise full posterior beta densities as a matrix plot |
 
-For an overview of population projection models generally, see 
-[Hal Caswell, 2001, Matrix Population Models: Construction, Analysis, and Interpretation](https://books.google.com/books/about/Matrix_Population_Models.html?id=CPsTAQAAIAAJ).
+All functions take a `TF` list of two matrices as their first argument:
+a transition matrix `T` and a fertility matrix `F`. These can be
+constructed by hand or created with
+`popbio::projection.matrix(..., TF = TRUE)` from individual-level
+transition data.
 
+## Vignettes
+
+| # | Vignette | Topic |
+|---|---|---|
+| 01 | Quick start | Minimal worked example with *Lepanthes eltoroensis* |
+| 02 | Introduction | Full workflow walkthrough |
+| 03 | Single population | Working with one population and transition period |
+| 04 | Credible intervals | `transition_CrI()` and plotting with *Cypripedium calceolus* |
+| 05 | Prior information | Effect of priors on transitions and fertility |
+| 06 | Animal matrices | Examples with animal population data |
+
+Browse all vignettes at <https://atiretoo.github.io/raretrans>.
+
+## Reference
+
+Caswell, H. (2001). *Matrix Population Models: Construction, Analysis,
+and Interpretation* (2nd ed.). Sinauer Associates.
 
 ## Code of Conduct
 
-Please note that the 'raretrans' project is released with a
+Please note that the `raretrans` project is released with a
 [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By contributing to this project, you agree to abide by its terms.
+
