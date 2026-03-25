@@ -1,12 +1,12 @@
 ---
-title: "Introduction to raretrans"
+title: "02 Introduction to raretrans"
 output:
   rmarkdown::html_vignette:
     fig_caption: yes
     toc: true
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Introduction to raretrans}
+  %\VignetteIndexEntry{02 Introduction to raretrans}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -458,17 +458,15 @@ For a worked example that starts from individual-level field observations see
 
 ## References
 
-Burns, J. H., Blomberg, S. P., Crone, E. E., Ehrlen, J., Knight, T. M.,
-  Pichancourt, J.-B., ..., & Buckley, Y. M. (2010). Empirical tests of life-history
-  evolution theory using phylogenetic analysis of plant demography. *Journal of
-  Ecology*, **98**, 334–344.
+Burns, J., Blomberg, S., Crone, E., Ehrlén, J., Knight, T., Pichancourt, J.-B.,,
+ Ramula, S., Wardle, G., & Buckley, Y. (2010). Empirical tests of life-history,
+evolution theory using phylogenetic analysis of plant demography.,
+ *Journal of Ecology*, **98**(2), 334–344.,
+ <https://doi.org/10.1111/j.1365-2745.2009.01634.x>
 
 Salguero-Gómez, R., Jones, O. R., Archer, C. R., Buckley, Y. M., Che-Castaldo, J.,
   Caswell, H., ..., & Vaupel, J. W. (2015). The COMPADRE Plant Matrix Database: an
   open online repository for plant demography. *Journal of Ecology*, **103**, 202–218.
   <https://doi.org/10.1111/1365-2745.12334>
 
-Tremblay, R. L., Tyre, A. J., Pérez, M.-E., & Hutchings, M. J. (2021).
-  Population growth estimation from count data: Bayesian inference and its use in
-  conservation. *Ecological Modelling*, **451**, 109526.
-  <https://doi.org/10.1016/j.ecolmodel.2021.109526>
+Tremblay, R. L., Tyre, A. J., Pérez, M.-E., & Ackerman, J. D. (2021). Population projections from holey matrices: Using prior information to estimate rare transition events. Ecological Modelling, 447, 109526. https://doi.org/10.1016/j.ecolmodel.2021.109526

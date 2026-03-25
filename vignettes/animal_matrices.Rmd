@@ -1,10 +1,10 @@
 ---
-title: "Matrices of animal populations"
-output: 
-  rmarkdown::pdf_document:
+title: "06 Matrices of animal populations"
+output:
+  rmarkdown::html_vignette:
     fig_caption: yes
 vignette: >
-  %\VignetteIndexEntry{Matrices of animal populations}
+  %\VignetteIndexEntry{06 Matrices of animal populations}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: references.bib

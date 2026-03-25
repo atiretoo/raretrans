@@ -1,7 +1,14 @@
-pandoc: 2.3.1
-pkgdown: 1.3.0
+pandoc: '3.2'
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  animal_matrices: animal_matrices.html
+  credible_intervals: credible_intervals.html
+  introduction: introduction.html
   onepopperiod: onepopperiod.html
+  quick_start: quick_start.html
   transition_priors: transition_priors.html
-
+last_built: 2026-03-25T19:05Z
+urls:
+  reference: https://atiretoo.github.io/raretrans/reference
+  article: https://atiretoo.github.io/raretrans/articles

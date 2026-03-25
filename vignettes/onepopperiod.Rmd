@@ -1,10 +1,10 @@
 ---
-title: "Working with a single population and transition"
+title: "03 Working with a single population and transition"
 output:
   rmarkdown::html_vignette:
     fig_caption: yes
 vignette: >
-  %\VignetteIndexEntry{Working with a single population and transition}
+  %\VignetteIndexEntry{03 Working with a single population and transition}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
