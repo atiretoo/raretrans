@@ -20,6 +20,16 @@
   with `is.null(P)` so that passing `P = NULL` correctly triggers the uniform
   prior default.
 
+## Vignettes
+* Added `introduction` vignette: a beginner-friendly walkthrough of the full
+  `raretrans` workflow using a published *Chamaedorea elegans* matrix
+  (Burns et al. 2013 / COMPADRE). Covers entering matrices directly, uniform
+  and informative priors, `fill_transitions()`, `fill_fertility()`,
+  `sim_transitions()`, `transition_CrI()`, `plot_transition_CrI()`, and
+  `plot_transition_density()`.
+* Fixed `onepopperiod` vignette: removed `devtools::load_all()` call that
+  would fail during CRAN's vignette build.
+
 ## Documentation
 * Completed full documentation for the `L_elto` dataset, including accurate
   descriptions of all 13 variables, stage code definitions, and references.

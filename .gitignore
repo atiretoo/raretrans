@@ -9,3 +9,5 @@ vignettes/.DS_Store
 .DS_Store
 doc
 Meta
+docs/
+vignettes/*.html
