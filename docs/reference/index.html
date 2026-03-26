@@ -18,17 +18,17 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/animal_matrices.html">06 Matrices of animal populations</a></li>
-    <li><a class="dropdown-item" href="../articles/credible_intervals.html">04 Credible intervals for transition probabilities: Cypripedium calceolus</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/quick_start.html">01 Quick start: credible intervals for transition probabilities</a></li>
     <li><a class="dropdown-item" href="../articles/introduction.html">02 Introduction to raretrans</a></li>
     <li><a class="dropdown-item" href="../articles/onepopperiod.html">03 Working with a single population and transition</a></li>
-    <li><a class="dropdown-item" href="../articles/quick_start.html">01 Quick start: credible intervals for transition probabilities</a></li>
+    <li><a class="dropdown-item" href="../articles/credible_intervals.html">04 Credible intervals for transition probabilities: Cypripedium calceolus</a></li>
     <li><a class="dropdown-item" href="../articles/transition_priors.html">05 Effect of prior information on transition probabilities and fertility</a></li>
+    <li><a class="dropdown-item" href="../articles/animal_matrices.html">06 Matrices of animal populations</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/atiretoo/raretrans/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/atiretoo/raretrans" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -41,7 +41,115 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="package-overview">Package overview<a class="anchor" aria-label="anchor" href="#package-overview"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="raretrans-package.html">raretrans</a></code> <code><a href="raretrans-package.html">raretrans-package</a></code>
+
+        </dt>
+        <dd>raretrans: A package for creating and updating Bayesian priors for matrix population models</dd>
+      </dl></div><div class="section level2">
+      <h2 id="main-functions">Main functions<a class="anchor" aria-label="anchor" href="#main-functions"></a></h2>
+
+      <div class="section-desc"><p>Core functions for filling structural zeros</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="fill_transitions.html">fill_transitions()</a></code>
+
+        </dt>
+        <dd>Combine prior and data for transition matrix</dd>
+
+        <dt>
+
+          <code><a href="fill_fertility.html">fill_fertility()</a></code>
+
+        </dt>
+        <dd>Combine prior and data for fertility matrix</dd>
+      </dl></div><div class="section level2">
+      <h2 id="simulation">Simulation<a class="anchor" aria-label="anchor" href="#simulation"></a></h2>
+
+      <div class="section-desc"><p>Simulate posterior matrices</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="sim_transitions.html">sim_transitions()</a></code>
+
+        </dt>
+        <dd>Simulate population projection matrices</dd>
+      </dl></div><div class="section level2">
+      <h2 id="credible-intervals">Credible intervals<a class="anchor" aria-label="anchor" href="#credible-intervals"></a></h2>
+
+      <div class="section-desc"><p>Compute and plot credible intervals</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="transition_CrI.html">transition_CrI()</a></code>
+
+        </dt>
+        <dd>Calculate beta credible intervals for all transition matrix entries</dd>
+
+        <dt>
+
+          <code><a href="plot_transition_CrI.html">plot_transition_CrI()</a></code>
+
+        </dt>
+        <dd>Plot beta credible intervals for transition matrix entries</dd>
+
+        <dt>
+
+          <code><a href="plot_transition_density.html">plot_transition_density()</a></code>
+
+        </dt>
+        <dd>Plot posterior beta density curves for all transition matrix entries</dd>
+      </dl></div><div class="section level2">
+      <h2 id="helper-functions">Helper functions<a class="anchor" aria-label="anchor" href="#helper-functions"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="get_state_vector.html">get_state_vector()</a></code>
+
+        </dt>
+        <dd>Helper functions for generating different priors</dd>
+
+        <dt>
+
+          <code><a href="rdirichlet.html">rdirichlet()</a></code>
+
+        </dt>
+        <dd>Dirichlet distributed random numbers</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
 
 
@@ -59,68 +167,13 @@
 
         <dt>
 
-          <code><a href="fill_fertility.html">fill_fertility()</a></code>
+          <code><a href="document_data.html">document_data()</a></code>
 
         </dt>
-        <dd>Combine prior and data for fertility matrix</dd>
-
-        <dt>
-
-          <code><a href="fill_transitions.html">fill_transitions()</a></code>
-
-        </dt>
-        <dd>Combine prior and data for transition matrix</dd>
-
-        <dt>
-
-          <code><a href="get_state_vector.html">get_state_vector()</a></code>
-
-        </dt>
-        <dd>Helper functions for generating different priors</dd>
-
-        <dt>
-
-          <code><a href="plot_transition_CrI.html">plot_transition_CrI()</a></code>
-
-        </dt>
-        <dd>Plot beta credible intervals for transition matrix entries</dd>
-
-        <dt>
-
-          <code><a href="plot_transition_density.html">plot_transition_density()</a></code>
-
-        </dt>
-        <dd>Plot posterior beta density curves for all transition matrix entries</dd>
-
-        <dt>
-
-          <code><a href="raretrans-package.html">raretrans</a></code> <code><a href="raretrans-package.html">raretrans-package</a></code>
-
-        </dt>
-        <dd>raretrans: A package for creating and updating Bayesian priors for matrix population models</dd>
-
-        <dt>
-
-          <code><a href="rdirichlet.html">rdirichlet()</a></code>
-
-        </dt>
-        <dd>Dirichlet distributed random numbers</dd>
-
-        <dt>
-
-          <code><a href="sim_transitions.html">sim_transitions()</a></code>
-
-        </dt>
-        <dd>Simulate population projection matrices</dd>
-
-        <dt>
-
-          <code><a href="transition_CrI.html">transition_CrI()</a></code>
-
-        </dt>
-        <dd>Calculate beta credible intervals for all transition matrix entries</dd>
+        <dd>Add roxygen2 documentation template for a dataset</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

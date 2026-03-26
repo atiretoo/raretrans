@@ -1,4 +1,56 @@
 url: https://atiretoo.github.io/raretrans
+
 template:
   bootstrap: 5
 
+home:
+  title: "raretrans: Bayesian Priors for Matrix Population Models"
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    github:
+      icon: fab fa-github fa-lg
+      href: https://github.com/atiretoo/raretrans
+      aria-label: GitHub
+
+reference:
+  - title: "Package overview"
+    contents:
+      - raretrans-package
+  - title: "Main functions"
+    desc: "Core functions for filling structural zeros"
+    contents:
+      - fill_transitions
+      - fill_fertility
+  - title: "Simulation"
+    desc: "Simulate posterior matrices"
+    contents:
+      - sim_transitions
+  - title: "Credible intervals"
+    desc: "Compute and plot credible intervals"
+    contents:
+      - transition_CrI
+      - plot_transition_CrI
+      - plot_transition_density
+  - title: "Helper functions"
+    contents:
+      - get_state_vector
+      - rdirichlet
+  - title: "Data"
+    contents:
+      - L_elto
+      - document_data
+
+articles:
+  - title: "Vignettes"
+    navbar: ~
+    contents:
+      - quick_start
+      - introduction
+      - onepopperiod
+      - credible_intervals
+      - transition_priors
+      - animal_matrices
