@@ -29,7 +29,7 @@ URL: https://atiretoo.github.io/raretrans/,
 BugReports: https://github.com/atiretoo/raretrans/issues
 License: MIT + file LICENSE
 Depends:
-    R (>= 3.5)
+    R (>= 4.1.0)
 Imports:
     ggplot2,
     rlang,
@@ -38,6 +38,7 @@ Suggests:
     covr,
     devtools,
     dplyr,
+    googledrive,
     gridExtra,
     huxtable,
     knitr,

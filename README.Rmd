@@ -1,7 +1,6 @@
 ---
 output: github_document
 ---
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
@@ -29,23 +28,39 @@ Based on methods described in:
 > estimate rare transition events. *Ecological Modelling*, **447**, 109526.
 > <https://doi.org/10.1016/j.ecolmodel.2021.109526>
 
+## Requirements
+
+- R >= 4.1.0
+- Core package dependencies: `ggplot2`, `rlang`
+- Vignette dependencies: `tidyverse`, `popbio`, `huxtable`, `popdemo`,
+  `googledrive`
+
+> **Note:** The core functions work on any R >= 4.1.0. Vignettes require
+> R >= 4.1.0 due to dependencies in `popdemo`, `dplyr`, and `purrr`.
+> If you are on an older version of R, install without vignettes (see
+> below) and read them online at <https://atiretoo.github.io/raretrans>.
+
 ## Installation
 
-`raretrans` is not currently available from CRAN. Install the development
-version from GitHub with:
+`raretrans` is not currently available from CRAN. Install from GitHub with:
 ```{r, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("atiretoo/raretrans")
+# install.packages("remotes")  # if needed
+remotes::install_github("atiretoo/raretrans")
 ```
 
-To install with vignettes:
+To install with vignettes (requires R >= 4.1.0):
 ```{r, eval = FALSE}
-devtools::install_github("atiretoo/raretrans", build_vignettes = TRUE)
+remotes::install_github("atiretoo/raretrans", build_vignettes = TRUE)
+```
+
+If vignette installation fails, install without them and read online:
+```{r, eval = FALSE}
+remotes::install_github("atiretoo/raretrans", build_vignettes = FALSE)
 ```
 
 The code and data used to produce the published paper are tagged `v1.0.0`:
 ```{r, eval = FALSE}
-devtools::install_github("atiretoo/raretrans@v1.0.0")
+remotes::install_github("atiretoo/raretrans@v1.0.0")
 ```
 
 ## Overview
@@ -67,6 +82,21 @@ constructed by hand or created with
 `popbio::projection.matrix(..., TF = TRUE)` from individual-level
 transition data.
 
+## Quick Start
+```{r, eval = FALSE}
+library(raretrans)
+
+# Example with Lepanthes eltoroensis data included in the package
+data(L_elto)
+
+# Build a TF list from individual transition data
+TF <- popbio::projection.matrix(L_elto, TF = TRUE)
+
+# Fill structural zeros using uninformative priors
+fill_transitions(TF)
+fill_fertility(TF)
+```
+
 ## Vignettes
 
 | # | Vignette | Topic |
@@ -80,6 +110,11 @@ transition data.
 
 Browse all vignettes at <https://atiretoo.github.io/raretrans>.
 
+## Getting Help
+
+- Report bugs or request features at <https://github.com/atiretoo/raretrans/issues>
+- Read the full function reference at <https://atiretoo.github.io/raretrans/reference>
+
 ## Reference
 
 Caswell, H. (2001). *Matrix Population Models: Construction, Analysis,
@@ -90,4 +125,3 @@ and Interpretation* (2nd ed.). Sinauer Associates.
 Please note that the `raretrans` project is released with a
 [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By contributing to this project, you agree to abide by its terms.
-
