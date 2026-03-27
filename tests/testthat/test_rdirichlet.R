@@ -43,3 +43,20 @@ test_that("rdirichlet respects concentration: high alpha concentrates near mean"
   col_means <- colMeans(result)
   expect_equal(col_means, c(1/3, 1/3, 1/3), tolerance = 0.01)
 })
+
+# --- size boundary tests ---
+
+test_that("rdirichlet works for a small (2-category) alpha", {
+  set.seed(42)
+  result <- rdirichlet(10, c(1, 1))
+  expect_equal(ncol(result), 2)
+  expect_equal(rowSums(result), rep(1, 10), tolerance = 1e-10)
+})
+
+test_that("rdirichlet works for a large (5-category) alpha", {
+  set.seed(42)
+  result <- rdirichlet(10, c(1, 2, 3, 4, 5))
+  expect_equal(ncol(result), 5)
+  expect_equal(rowSums(result), rep(1, 10), tolerance = 1e-10)
+  expect_true(all(result >= 0))
+})
