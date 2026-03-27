@@ -21,11 +21,17 @@ Authors@R:
       person(given = "Sasha",
              family = "Tenhumberg",
              role = "ctb"))
-Description: Functions to fill structural zeros in population projection
-    matrices using Bayesian priors. Implements the multinomial-Dirichlet
-    model for transition probabilities and Gamma-Poisson model for
-    reproduction, as described in Tremblay et al. (2021)
-    <doi:10.1016/j.ecolmodel.2021.109526>.
+Description: Provides functions to fill structural zeros in population
+    projection matrices using Bayesian priors. Implements the
+    multinomial-Dirichlet model for transition probabilities and the
+    Gamma-Poisson model for reproduction, allowing analysts to incorporate
+    prior biological knowledge when observed transitions are rare or absent.
+    Includes functions to compute marginal posterior credible intervals for
+    all transition probabilities ('transition_CrI()'), visualise those
+    intervals as point-range plots ('plot_transition_CrI()'), and display
+    the full posterior beta density for each matrix entry
+    ('plot_transition_density()'). Methods are described in Tremblay et al.
+    (2021) <doi:10.1016/j.ecolmodel.2021.109526>.
 URL: https://atiretoo.github.io/raretrans/,
     https://github.com/atiretoo/raretrans
 BugReports: https://github.com/atiretoo/raretrans/issues
