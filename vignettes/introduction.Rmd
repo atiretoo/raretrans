@@ -31,20 +31,31 @@ into two components:
 The full model is $\mathbf{A} = \mathbf{T} + \mathbf{F}$, and the asymptotic population
 growth rate $\lambda$ is the dominant eigenvalue of $\mathbf{A}$.
 
-### The structural-zero problem
+### Biased estimates from small samples
 
-When populations are small or study periods are short, some biologically possible
-transitions are never observed — they appear as **zeros** in the data even though they
-can and do occur in real populations. These are called **structural zeros** (or rare transitions). A
-matrix containing structural zeros is mathematically problematic:
+When populations are small or study periods are short, the observed transition
+frequencies produce two distinct types of biased estimates:
 
-- It may fail to be **ergodic** (some stages become unreachable).
-- It may be **reducible** (some subsets of stages are disconnected).
-- The asymptotic growth rate $\lambda$ may be badly biased.
+**Structural zeros**: biologically possible transitions that are never observed
+and appear as **0%** in the data. These are rare events missed by chance — not
+truly impossible transitions.
 
-`raretrans` addresses this by using **Bayesian priors** to add small amounts of
-"prior evidence" to the unobserved transitions, combining what we believe biologically
-with what we actually observed.
+**Structural ones**: transitions estimated at **100%** survival, stasis, or
+mortality. For example, if all 3 observed juveniles survived, the data suggest
+100% juvenile survival — a biologically implausible certainty caused entirely by
+small sample size.
+
+Both are artefacts of insufficient data, and both distort the matrix:
+
+- A matrix with structural zeros may fail to be **ergodic** (some stages become
+  unreachable) or **reducible** (some subsets of stages are disconnected).
+- A matrix with structural ones overestimates certainty in vital rates, producing
+  a falsely precise and biologically unrealistic model.
+- In either case, the asymptotic growth rate $\lambda$ may be substantially biased.
+
+`raretrans` addresses both problems by using **Bayesian priors** to regularise
+estimates, adding prior biological knowledge to the observed data so that all
+transitions receive a credible, non-extreme estimate.
 
 ---
 
@@ -146,7 +157,7 @@ colSums(TF$T)
 
 The `seed` column sums to only `r round(sum(TF$T[,1]), 4)`. The rest (`r round(1 - sum(TF$T[,1]), 4)`) represents mortality of seeds. Importantly, the transition from `seed` to `nonrep` is 0.001 — very small and easily missed in a short study. In a small sample we might observe zero such transitions, leaving a **structural zero** in the data matrix even though we know germination happens.
 
-Similarly, the `nonrep` → `rep` entry (0.1429) and the back-transition `rep` → `nonrep` (0.0200) could be missed in small populations. When structural zeros appear in real data, we need a principled way to incorporate our biological knowledge that these transitions can occur.
+Similarly, the `nonrep` → `rep` entry (0.1429) and the back-transition `rep` → `nonrep` (0.0200) could be missed in small populations. Conversely, if all observed individuals in a stage survived, the data would show a **structural one** (100% survival or stasis) — equally unreliable because it is driven by small sample size rather than biology. When either type of bias appears in real data, we need a principled way to incorporate our biological knowledge and regularise the estimates.
 
 ---
 
@@ -445,7 +456,7 @@ This vignette introduced the core workflow of `raretrans`:
 2. **Specify a prior** matrix `P` that encodes biological knowledge about which
    transitions are possible and how likely they are. Prefer informative priors over the
    uniform default when you have relevant expertise.
-3. **Fill structural zeros** using `fill_transitions()` and `fill_fertility()`.
+3. **Regularise estimates** using `fill_transitions()` and `fill_fertility()` to correct structural zeros, structural ones, and other small-sample biases.
 4. **Simulate** many matrices from the posterior with `sim_transitions()` to obtain a
    credible interval on $\lambda$.
 5. **Visualise** transition-level uncertainty with `transition_CrI()`,

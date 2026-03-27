@@ -21,11 +21,16 @@ Authors@R:
       person(given = "Sasha",
              family = "Tenhumberg",
              role = "ctb"))
-Description: Provides functions to fill structural zeros in population
-    projection matrices using Bayesian priors. Implements the
-    multinomial-Dirichlet model for transition probabilities and the
-    Gamma-Poisson model for reproduction, allowing analysts to incorporate
-    prior biological knowledge when observed transitions are rare or absent.
+Description: Provides functions to correct biased transition and fertility
+    estimates in population projection matrices caused by small sample sizes.
+    Small or short-term studies frequently produce structural zeros
+    (biologically possible transitions never observed) and structural ones
+    (transitions estimated at 100% survival, stasis, or mortality that are
+    biologically implausible). Both distort matrix structure and bias
+    estimates of population growth. Implements a multinomial-Dirichlet
+    Bayesian prior for transition probabilities and a Gamma-Poisson prior
+    for reproduction, allowing analysts to incorporate prior biological
+    knowledge and regularise estimates from rare or unobserved events.
     Includes functions to compute marginal posterior credible intervals for
     all transition probabilities ('transition_CrI()'), visualise those
     intervals as point-range plots ('plot_transition_CrI()'), and display
