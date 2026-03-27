@@ -24,7 +24,11 @@ Here we explore the population consequences of setting a prior accounting for co
 We will use observations of an epiphytic Orchid *Lepanthes eltoroensis* Stimson an endemic species from Puerto Rico [@tremblay2003population].
 
 ```{r setup, message=FALSE, echo=-7}
-library(tidyverse)
+library(dplyr)
+library(purrr)
+library(tibble)
+library(tidyr)
+library(ggplot2)
 library(popbio)
 library(raretrans)
 
@@ -42,14 +46,6 @@ knitr::kable(A, digits=2,
 ```
 
 ```{r hidethis, include = FALSE}
-knitting <- isTRUE(getOption('knitr.in.progress'))
-if(!knitting){
-  pathtoimages="images"
-#   # login to imgur
-#   library(imguR)
-#   imgurtkn <- imgur_login()
-#   imgurtkn$refresh()
-}
 knitr::opts_chunk$set(fig.width = 5, fig.height = 5)
 ```
 
@@ -71,11 +67,6 @@ ggboth <- gridExtra::arrangeGrob(gg1, gg2)
 grid::grid.draw(ggboth)
 
 ```
-
-```{r, eval=FALSE, include = FALSE}
-ggsave("pop_by_time.png", plot = ggboth, device="png", path=pathtoimages)
-```
-
 
 OK, now we want to generate matrices for each year and popnum. We have to change the variables into factors and control the levels so that the resulting matrices end up with the right shape with zeros for the missing transitions. Also have to coerce each grouped tbl_df to a regular data.frame using `as.data.frame()` before passing to `projection.matrix()`. 
 ```{r}
@@ -114,11 +105,6 @@ ggplot(allA, aes(x=lmbda)) + geom_histogram(bins = 25) + facet_wrap(~year)+
 
 ```
 
-```{r, eval=FALSE, include = FALSE}
-ggsave("histLmbdaByYear.png", path=pathtoimages)
-```
-
-
 Now, we need to figure out how many matrices are missing transitions. The full matrix has observed transitions in every cell. 
 
 ```{r checkErgIrr1, echo=-4}
@@ -156,7 +142,6 @@ BaseTable <-
           250,             5, "juvenile", badN71[2], badA71[2,1],badA71[2,2],badA71[2,3],
           250,             5, "adult",    badN71[3], badA71[3,1],badA71[3,2],badA71[3,3],
           250,             5, "dead",     NA,         1-sum(badA71[,1]), 1-sum(badA71[,2]), 1-sum(badA71[,3]))
-
 
 # make some space for the prior versions
 RLT_Tprior <- matrix(c(0.25, 0.025, 0.0,
@@ -208,10 +193,6 @@ ggplot(aes(x=approx, y = sim)) + geom_point() +
   rlt_theme +
   xlab(expression(paste("Tuljapurkar's approximate stochastic ", log(lambda)))) +
   ylab(expression(paste("Stochastic ", log(lambda), " by simulation")))
-```
-
-```{r, eval=FALSE, include = FALSE}
-ggsave("stochGrowthRateBad.png", path=pathtoimages)
 ```
 
 The six populations where the simulated values are unavailable have very low approximate growth rates as well. All the stochastic growth rates are less than 1. Note that these calculations assume each matrix is perfectly observed; the only stochasticity is between year environmental stochasticity as represented by the observed sample of years. 
@@ -278,10 +259,6 @@ ggplot(testing, aes(x=lmbda, y=ldirch)) + geom_point() +
   rlt_theme
 ```
 
-```{r, eval=FALSE, include = FALSE}
-ggsave("fillDirichlet.png", path=pathtoimages)
-```
-
 ```{r, eval=FALSE, include=FALSE}
 testing %>% summarize(m_ldirch = mean(ldirch)) %>% kableExtra::kable()
 ```
@@ -308,10 +285,6 @@ ggplot(compare_approx, aes(x=ignored, y = unif)) +
   xlab(expression(paste("log(",lambda,") ignoring zeros"))) + 
   ylab(expression(paste("log(",lambda,") with uniform prior"))) +
   rlt_theme
-```
-
-```{r, eval = FALSE, include=FALSE}
-ggsave("stochDirchVsBad.png", path=pathtoimages)
 ```
 
 So using a Dirichlet prior to fill in the gaps works, and doesn't appear to distort the stochastic population growth rate; all populations still have negative growth. Most populations end up with stochastic growth rates that are lower than with the problematic matrices. All resulting matrices are now ergodic and irreducible.
@@ -353,11 +326,6 @@ ggplot(testing, aes(x=lmbda, y=lgamma)) + geom_point() +
   xlab(expression(paste(lambda, " ignoring zeros"))) + 
   ylab(expression(paste(lambda, " using an uninformative prior"))) +
   rlt_theme
-```
-
-```{r, eval=FALSE, include = FALSE}
-  ggsave("fillGamma.png", path=pathtoimages)
-
 ```
 
 The matrices with $\lambda = 0$ typically have very few individuals. Matrices with $\lambda = 1$ usually have transitions only on the main diagonal. The uninformative Gamma prior does not change $\lambda$, and does not improve the ergodicity and irreducibility issue. When there is at least 1 adult present, the expected value of fertility is very close to zero. When there are no adults present, all those matrices cannot reach the adult stage and so the expected value of fertility does not affect $\lambda$. However, this is not a necessary condition. 
@@ -407,7 +375,6 @@ diffPriors[["Uniform"]] <- testing %>%
          Aprior = map2(Tprior, Fprior, `+`),
          lprior = map_dbl(Aprior, lambda))
 
-
 diffPriors[["RLT, weight = 1"]] <- testing %>% 
   mutate(Tprior = map2(TF, N, fill_transitions, 
                        P = RLT_Tprior, returnType = "T"),
@@ -449,15 +416,9 @@ ggplot(diffPriors, aes(x=lmbda, y=lprior)) +
   theme_bw() + rlt_theme
 ```
 
-```{r, eval = FALSE, include=FALSE}
-  ggsave("fillDirichletPrior1.png", path=pathtoimages)
-```
-
-
 # Obtaining credible intervals on vital rates and $\lambda$
 
 Recognizing that the observed transitions are realizations of a Dirichlet distribution gives us a very simple way to derive credible intervals for the transition probabilities in our matrix. The marginal distribution of a single transition is a beta distribution as described above, and we can simply report the 2.5% and 97.5% percentiles of that distribution to provide a credible interval on a transition rate. These intervals do shift and shrink as the weight on the prior increases.
-
 
 ```{r credibleIntervals1, echo=FALSE, fig.width = 7, fig.height = 7, fig.cap="Confidence limits or Credible intervals for transition probabilities out of seedling stage in Population 250, year 5. Shaded bands correspond to 50% (darkest), 90%, 95% and 99.9% (lightest) credible intervals. Smaller intervals are not visible in the p->a transitions when the upper boundary of the interval is smaller than 0.01. Labels are median (lower 95% CI, upper 95% CI). Note that where the median and lower interval are equal to 0.001, the actual value is < 0.001.", warning=FALSE}
 # get multinomial confidence interval for Likelihood based interval on NONE
@@ -535,7 +496,6 @@ xx <- left_join(xx, params, by = c("prior", "transition")) %>%
 params$prior <- factor(params$prior, levels = c("None", "Uninformative", "RLT, w = 1", "RLT, w = 0.5N", "RLT, w = N"))
 params$transition <- factor(params$transition, levels = c("s to s", "s to j", "s to a", "s to m"))
 
-
 # fix alphas
 # see discussions at https://stackoverflow.com/questions/17311917/ggplot2-the-unit-of-size 
 # to see where I get the conversion factor for points - size to keep fonts the same.
@@ -566,11 +526,6 @@ ggplot(filter(xx, transition != "s to m", prior != "None"), aes(x = prob, y=dens
                     guide = FALSE)
 ```
 
-```{r, eval = FALSE, include=FALSE}
-  ggsave("credibleIntervals1.png", path=pathtoimages)
-```
-
-
 Obtaining credible intervals on $\lambda$ requires simulation, because it is difficult (or maybe impossible) to use the characteristic equation to combine the probability distributions of the matrix entries to obtain the distribution of $\lambda$. 
 
 ```{r lambda_ci, fig.cap="Distribution of asymptotic population growth rates for population 250, year 5, with different prior information."}
@@ -581,7 +536,6 @@ diffPriors_lci[["Uninformative"]] <- tibble(A = sim_transitions(allA$TF[[71]],
                                                           allA$N[[71]], 
                                                           samples = samples), 
                                       lprior = map_dbl(A, lambda))
-
 
 diffPriors_lci[["RLT, weight = 1"]] <- tibble(A = sim_transitions(allA$TF[[71]], allA$N[[71]], 
                                                                   P=RLT_Tprior, 
@@ -628,50 +582,6 @@ ggplot(diffPriors_lci, aes(x=lprior)) +
   rlt_theme + 
   xlab(expression(paste(lambda," asymptotic population growth"))) +
   ylab("Posterior density")
-```
-
-```{r, eval = FALSE, include=FALSE}
-  ggsave("credible_lambda.png", path=pathtoimages)
-```
-
-
-```{r uploadGoogleDrive, eval=FALSE, echo=FALSE, include=FALSE}
-library(googledrive)
-images <- list.files(path=pathtoimages, full.names=TRUE)
-# # first time do this
-# imgDrive <- list()
-# for (i in seq_along(images)){
-#   imgDrive[[i]] <- drive_upload(media=images[i],
-#                path="raretrans/images/")
-# }
-# imgIDs <- map_chr(imgDrive,"id")
-# # doesn't work with multiple ids
-# drive_share(as_id(imgIDs[1]), role="reader", type="anyone")
-# # need to remove the /view?usp=drivesdk at the end?
-# drive_share_link(as_id(imgIDs))
-# dput(imgIDs)
-# [1] "https://drive.google.com/file/d/1sfmMokYMmdlA6wtgl_ogu3_Gg-djeOw6/view?usp=drivesdk"
-# [2] "https://drive.google.com/file/d/1qDk5z8tXaFyzVp2461-q7poHz5ffgTHA/view?usp=drivesdk"
-# [3] "https://drive.google.com/file/d/1Yez_8pjYnh0Q-Cgqv1Ro2d8ycIeYpotk/view?usp=drivesdk"
-# [4] "https://drive.google.com/file/d/1Y-KULUZSdqCt6oHlvmU_o8XQboNYzNNb/view?usp=drivesdk"
-# [5] "https://drive.google.com/file/d/1Ha9jXBCHLdynz_zvp5B8HfFTy13Dg_OD/view?usp=drivesdk"
-# [6] "https://drive.google.com/file/d/1e5D1IDLbAo-M9Kq646Sb4b3b89MpdRDf/view?usp=drivesdk"
-# [7] "https://drive.google.com/file/d/1qFNKkEHx7UFTY7uZ7zMwvbhezVcyg8em/view?usp=drivesdk"
-# [8] "https://drive.google.com/file/d/1Da5vi-J6y7eNgM2px6NKmk0zclIgD7ra/view?usp=drivesdk"
-imgIDs <- c("1sfmMokYMmdlA6wtgl_ogu3_Gg-djeOw6", "1qDk5z8tXaFyzVp2461-q7poHz5ffgTHA", 
-"1Yez_8pjYnh0Q-Cgqv1Ro2d8ycIeYpotk", "1Y-KULUZSdqCt6oHlvmU_o8XQboNYzNNb", 
-"1Ha9jXBCHLdynz_zvp5B8HfFTy13Dg_OD", "1e5D1IDLbAo-M9Kq646Sb4b3b89MpdRDf", 
-"1qFNKkEHx7UFTY7uZ7zMwvbhezVcyg8em", "1Da5vi-J6y7eNgM2px6NKmk0zclIgD7ra"
-)
-
-if (length(images) != length(imgIDs)) {
-  stop("you've added new images, delete everything and rerun startup code.")
-}
-
-for (i in seq_along(images)){
-  imgDrive[[i]] <- drive_update(file=as_id(imgIDs[i]),media=images[i])
-}
-
 ```
 
 \clearpage

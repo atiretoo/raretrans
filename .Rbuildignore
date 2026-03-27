@@ -1,9 +1,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.DS_Store$
+^\.Rhistory$
 ^docs$
 ^data-raw$
 ^\.\./test_bd/static/raretrans$
-^vignettes/images
 ^.httr-oauth
 ^\.httr-oauth$
 ^codecov\.yml$
@@ -18,3 +19,4 @@
 ^cran-comments.md$
 ^tests/testthat/random_helper_code.R$
 ^\.github$
+^vignettes/images$

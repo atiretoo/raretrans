@@ -11,7 +11,10 @@ vignette: >
 
 ```{r setup, message = FALSE}
 knitr::opts_chunk$set(echo = TRUE, tidy = TRUE)
-library(tidyverse)
+library(dplyr)
+library(purrr)
+library(tibble)
+library(ggplot2)
 library(popbio) # for projection.matrix()
 library(raretrans)
 # Raymond's theme modifications

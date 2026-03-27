@@ -36,9 +36,7 @@ Imports:
     stats
 Suggests:
     covr,
-    devtools,
     dplyr,
-    googledrive,
     gridExtra,
     huxtable,
     knitr,
@@ -50,7 +48,7 @@ Suggests:
     RColorBrewer,
     testthat,
     tibble,
-    tidyverse
+    tidyr
 VignetteBuilder:
     knitr
 Encoding: UTF-8

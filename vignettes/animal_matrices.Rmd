@@ -35,7 +35,11 @@ deviations, not as numbers of transitions.
 
 
 ```{r setup}
-library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(tibble)
+library(ggplot2)
 library(popbio)
 library(huxtable)
 
