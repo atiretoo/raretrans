@@ -4,13 +4,16 @@
 \name{raretrans-package}
 \alias{raretrans}
 \alias{raretrans-package}
-\title{raretrans: A package for creating and updating Bayesian priors for matrix population models}
+\title{raretrans: Bayesian Priors for Matrix Population Models}
 \description{
-This package provides functions that combine data on transitions with prior beliefs about
-transition probabilities and fertilities. Includes functions to create matrix population models from a combination
-of data on stage/age transitions and Bayesian prior information. This
-compensates for structural problems caused by missing observations of rare
-transitions.
+Provides functions to correct biased transition and fertility estimates in
+population projection matrices caused by small sample sizes. Small or
+short-term studies frequently produce structural zeros (biologically possible
+transitions never observed) and structural ones (transitions estimated at
+100% survival, stasis, or mortality that are biologically implausible).
+Both distort matrix structure and bias estimates of population growth.
+Functions combine observed transition data with Bayesian prior beliefs to
+regularise estimates from rare or unobserved events.
 }
 \seealso{
 Useful links:
@@ -22,12 +25,12 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Raymond Tremblay \email{raymond.tremblay@upr.edu}
+\strong{Maintainer}: Raymond Tremblay \email{raymond.tremblay@upr.edu} (\href{https://orcid.org/0000-0002-8588-4372}{ORCID})
 
 Authors:
 \itemize{
   \item Andrew Tyre \email{atyre2@gmail.com} (\href{https://orcid.org/0000-0001-9736-641X}{ORCID})
-  \item Maria-Eglee Perez \email{mariaeglee@gmail.com}
+  \item Maria-Eglee Perez \email{mariaeglee@gmail.com} (\href{https://orcid.org/0000-0001-8641-8405}{ORCID})
 }
 
 Other contributors:
