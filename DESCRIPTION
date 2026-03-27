@@ -6,7 +6,8 @@ Authors@R:
     c(person(given = "Raymond",
              family = "Tremblay",
              role = c("aut","cre"),
-             email = "raymond.tremblay@upr.edu"),
+             email = "raymond.tremblay@upr.edu",
+             comment = c(ORCID = "0000-0002-8588-4372")),
       person(given = "Andrew",
              family = "Tyre",
              role = "aut",
@@ -15,7 +16,8 @@ Authors@R:
       person(given = "Maria-Eglee",
              family = "Perez",
              role = "aut",
-             email = "mariaeglee@gmail.com"),
+             email = "mariaeglee@gmail.com",
+             comment = c(ORCID = "0000-0001-8641-8405")),
       person(given = "Sasha",
              family = "Tenhumberg",
              role = "ctb"))
@@ -52,5 +54,6 @@ Suggests:
 VignetteBuilder:
     knitr
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 RoxygenNote: 7.3.3
