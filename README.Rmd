@@ -86,13 +86,14 @@ transition data.
 ```{r, eval = FALSE}
 library(raretrans)
 
-# Example with Lepanthes eltoroensis data included in the package
+# Example with *Lepanthes eltoroensis* data included in the package
 data(L_elto)
 
 # Build a TF list from individual transition data
 TF <- popbio::projection.matrix(L_elto, TF = TRUE)
 
-# Fill structural zeros using uninformative priors
+# Fill structural zeros and perfect (1.0) survival, 
+# transitions, stasis and fertilities using uninformative priors
 fill_transitions(TF)
 fill_fertility(TF)
 ```
