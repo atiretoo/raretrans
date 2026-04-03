@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ```{r setup, message = FALSE}
-knitr::opts_chunk$set(echo = TRUE, tidy = TRUE)
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE, fig.path = "images/")
 library(tidyverse)
 library(popbio) # for projection.matrix()
 library(raretrans)

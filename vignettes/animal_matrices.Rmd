@@ -14,7 +14,8 @@ bibliography: references.bib
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  message = FALSE
+  message = FALSE,
+  fig.path = "images/"
 )
 options(huxtable.add_colnames = FALSE,
         digits = 3)

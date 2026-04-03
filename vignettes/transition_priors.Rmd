@@ -50,7 +50,7 @@ if(!knitting){
 #   imgurtkn <- imgur_login()
 #   imgurtkn$refresh()
 }
-knitr::opts_chunk$set(fig.width = 5, fig.height = 5)
+knitr::opts_chunk$set(fig.width = 5, fig.height = 5, fig.path = "images/")
 ```
 
 Data was collected from 1850 individuals which were permanently identified and tracked over a 6 year period in intervals of 6 months. Thus transitions are for six month intervals and not yearly transitions as is more frequently published.  The life history stages included in this analysis are seedlings (individuals without a lepanthiform sheet on any of the leaves), juveniles (individuals with no evidence of present or past reproductive effort, the base of the inflorescence are persistent), and adult (with presence of active or inactive inflorescences). The average population growth rate over all years and populations is `r format(popbio::lambda(A), digits=2)`, suggesting a rapid decline. 
@@ -117,6 +117,7 @@ ggplot(allA, aes(x=lmbda)) + geom_histogram(bins = 25) + facet_wrap(~year)+
 ```{r, eval=FALSE, include = FALSE}
 ggsave("histLmbdaByYear.png", path=pathtoimages)
 ```
+
 
 
 Now, we need to figure out how many matrices are missing transitions. The full matrix has observed transitions in every cell. 
@@ -451,6 +452,22 @@ ggplot(diffPriors, aes(x=lmbda, y=lprior)) +
 
 ```{r, eval = FALSE, include=FALSE}
   ggsave("fillDirichletPrior1.png", path=pathtoimages)
+```
+
+```{r}
+desc_stats_priors <- diffPriors %>% 
+  group_by(prior) %>% 
+  summarize(mean = mean(lprior),
+            sd = sd(lprior),
+            min = min(lprior),
+            max = max(lprior))
+desc_stats_raw <- diffPriors %>% 
+  filter(prior == "Uniform") %>% 
+  summarize(mean = mean(lmbda),
+            sd = sd(lmbda),
+            min = min(lmbda),
+            max = max(lmbda))
+knitr::kable(bind_rows(desc_stats_raw, desc_stats_priors), digits = 3)
 ```
 
 

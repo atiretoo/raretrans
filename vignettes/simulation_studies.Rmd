@@ -9,8 +9,11 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
+  fig.width = 7,
+  fig.height = 5,
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.path = "images/"
 )
 options(huxtable.add_colnames = FALSE,
         digits = 3)
@@ -304,13 +307,10 @@ transitions? Including impossible transitions? We rerun the simulations above
 with two different possible errors in the prior information. First, we will 
 use the weak prior on seedling transitions. In the second scenario we set to zero all 
 prior transitions with probabilities smaller than 0.01, and perturb 
-all other positive matrix entries by up to 25 or 50%. We compare both of these against the Bayesian method with accurate but uninformative priors on most transitions,
+all other positive matrix entries by 25%. We compare both of these against the Bayesian method with accurate but uninformative priors on most transitions,
 and accurate and strong priors on seedling transitions (closest to the bootstrap).
 
 ```{r}
-
-#data(method_comparison_2)
-
 transition_prior4 <- TF$T 
 transition_prior4[TF$T < 0.01] <- 0
 transition_prior4 <- transition_prior4 * 1.25 # 25% increase on priors
@@ -320,77 +320,136 @@ transition_prior4[,column_sums > 1] <- sweep(transition_prior4[,column_sums > 1]
 column_sums <- apply(transition_prior4, 2, sum)
 transition_prior4 <- rbind(transition_prior4, 1 - column_sums)
 
+data(method_comparison_2)
 
-set.seed(449535)
-plan("multisession", workers = 4)
-bigresults <- tibble(sample_size = seq(50, 500, by = 50),
-                     observations = future_map(sample_size, ~map(1:100,
-                                     function(x) sim_observations(TF, N = .x,
-                                                                  initial_stages = initial_stages)))) %>%
-  unnest(cols = observations) %>%
-  mutate(
-       TF = map(observations, projection_matrix, fertility = "Sd", TF = TRUE, add = add_Sd),
-       N = map(observations, get_state_vector),
-       A = map(TF, ~.x$T+.x$F),
-       lambdaraw = map_dbl(A, lambda))
-
-method_comparison_2 <- bigresults %>%
-  mutate(sim2_TF = map2(TF, N, function(.x, .y) sim_transitions(TF = .x,
-                      N = .y, P = transition_prior1,
-                      alpha = fertility_alpha, beta = fertility_beta,
-                      samples = 1000)),
-         sim3_TF = map2(TF, N, function(.x, .y) sim_transitions(TF = .x,
-                      N = .y, P = transition_prior4,
-                      alpha = fertility_alpha, beta = fertility_beta,
-                      samples = 1000)))
+# plan("multisession", workers = 4)
+# bigresults <- tibble(sample_size = seq(50, 500, by = 50),
+#                      observations = future_map(sample_size, 
+#                                                ~map(1:100, function(x) sim_observations(TF, N = .x, initial_stages = initial_stages)), 
+#                                                .options = furrr_options(seed = 449535))) %>%
+#   unnest(cols = observations) %>%
+#   mutate(
+#        TF = map(observations, projection_matrix, fertility = "Sd", TF = TRUE, add = add_Sd),
+#        N = map(observations, get_state_vector),
+#        A = map(TF, ~.x$T+.x$F),
+#        lambdaraw = map_dbl(A, lambda))
+# 
+# method_comparison_2 <- bigresults %>%
+#   mutate(sim2_TF = future_map2(TF, N, function(.x, .y) sim_transitions(TF = .x,
+#                       N = .y, P = transition_prior1,
+#                       alpha = fertility_alpha, beta = fertility_beta,
+#                       samples = 1000), .options = furrr_options(seed = 9989053)),
+#          sim3_TF = future_map2(TF, N, function(.x, .y) sim_transitions(TF = .x,
+#                       N = .y, P = transition_prior4,
+#                       alpha = fertility_alpha, beta = fertility_beta,
+#                       samples = 1000), .options = furrr_options(seed = 4707179)))
 
 bigresults2 <- method_comparison_2 %>% 
-  mutate(boot_lambdas = map(boot_TF, "lambda"),
-         boot_lci = map_dbl(boot_TF, ~quantile(.$lambda, p = 0.025)),
-         boot_uci = map_dbl(boot_TF, ~quantile(.$lambda, p = 0.975)),
-         good_bci = boot_lci < true_lambda & boot_uci > true_lambda,
-         width_bci = (boot_uci - boot_lci) / lambdaraw,
-         mean_bias_bci = map_dbl(boot_lambdas, ~mean(.x - true_lambda)),
-         se_bias_bci = map_dbl(boot_lambdas, ~sd(.x - true_lambda)),
-         sim_lambdas = map(sim_TF, function(ll) map_dbl(ll, lambda)),
-         sim_lci = map_dbl(sim_lambdas, quantile, p = 0.025),
-         sim_uci = map_dbl(sim_lambdas, quantile, p = 0.975),
-         good_sci = sim_lci < true_lambda & sim_uci > true_lambda,
-         width_sci = (sim_uci - sim_lci) / lambdaraw,
-         mean_bias_sci = map_dbl(sim_lambdas, ~mean(.x - true_lambda)),
-         se_bias_sci = map_dbl(sim_lambdas, ~sd(.x - true_lambda)))
+  mutate(sim2_lambdas = map(sim2_TF, function(ll) map_dbl(ll, lambda)),
+         sim2_lci = map_dbl(sim2_lambdas, quantile, p = 0.025),
+         sim2_uci = map_dbl(sim2_lambdas, quantile, p = 0.975),
+         good_sci2 = sim2_lci < true_lambda & sim2_uci > true_lambda,
+         width_sci2 = (sim2_uci - sim2_lci) / lambdaraw,
+         mean_bias_sci2 = map_dbl(sim2_lambdas, ~mean(.x - true_lambda)),
+         se_bias_sci2 = map_dbl(sim2_lambdas, ~sd(.x - true_lambda)),
+         sim3_lambdas = map(sim3_TF, function(ll) map_dbl(ll, lambda)),
+         sim3_lci = map_dbl(sim3_lambdas, quantile, p = 0.025),
+         sim3_uci = map_dbl(sim3_lambdas, quantile, p = 0.975),
+         good_sci3 = sim3_lci < true_lambda & sim3_uci > true_lambda,
+         width_sci3 = (sim3_uci - sim3_lci) / lambdaraw,
+         mean_bias_sci3 = map_dbl(sim3_lambdas, ~mean(.x - true_lambda)),
+         se_bias_sci3 = map_dbl(sim3_lambdas, ~sd(.x - true_lambda)))
 
-figure_results <- bigresults2 %>% 
+figure_results2 <- bigresults2 %>% 
   group_by(sample_size) %>% 
-  summarize(cover_boot = sum(good_bci),
-            width_boot = mean(width_bci),
-            width.lci_boot = quantile(width_bci, p = 0.025), 
-            width.uci_boot = quantile(width_bci, p = 0.975), 
-            bias_boot = mean(mean_bias_bci/true_lambda),
-            bias.lci_boot = quantile(mean_bias_bci/true_lambda, p = 0.025), 
-            bias.uci_boot = quantile(mean_bias_bci/true_lambda, p = 0.975), 
-            cover_sim = sum(good_sci),
-            width_sim = mean(width_sci),
-            width.lci_sim = quantile(width_sci, p = 0.025), 
-            width.uci_sim = quantile(width_sci, p = 0.975), 
-            bias_sim = mean(mean_bias_sci),
-            bias.lci_sim = quantile(mean_bias_sci/true_lambda, p = 0.025), 
-            bias.uci_sim = quantile(mean_bias_sci/true_lambda, p = 0.975)) %>% 
+  summarize(cover_sim2 = sum(good_sci2),
+            width_sim2 = mean(width_sci2),
+            width.lci_sim2 = quantile(width_sci2, p = 0.025), 
+            width.uci_sim2 = quantile(width_sci2, p = 0.975), 
+            bias_sim2 = mean(mean_bias_sci2),
+            bias.lci_sim2 = quantile(mean_bias_sci2/true_lambda, p = 0.025), 
+            bias.uci_sim2 = quantile(mean_bias_sci2/true_lambda, p = 0.975),
+            cover_sim3 = sum(good_sci3),
+            width_sim3 = mean(width_sci3),
+            width.lci_sim3 = quantile(width_sci3, p = 0.025), 
+            width.uci_sim3 = quantile(width_sci3, p = 0.975), 
+            bias_sim3 = mean(mean_bias_sci3),
+            bias.lci_sim3 = quantile(mean_bias_sci3/true_lambda, p = 0.025), 
+            bias.uci_sim3 = quantile(mean_bias_sci3/true_lambda, p = 0.975)) %>% 
   pivot_longer(cols = -1, 
               names_to = c(".value", "method"),
               names_sep = "_")
 
+fig_results_all <- bind_rows(figure_results, figure_results2)
 egg::ggarrange(
-  ggplot(figure_results) + 
+  ggplot(fig_results_all) + 
   geom_point(mapping = aes(x = sample_size, y = width, color = method)) + 
   geom_line(mapping = aes(x = sample_size, y = width, color = method)) + 
   geom_ribbon(mapping = aes(x = sample_size, ymin = width.lci, ymax = width.uci, fill = method), alpha = 0.1),
-  ggplot(figure_results) + 
+  ggplot(fig_results_all) + 
   geom_point(mapping = aes(x = sample_size, y = bias, color = method)) + 
   geom_line(mapping = aes(x = sample_size, y = bias, color = method)) + 
   geom_ribbon(mapping = aes(x = sample_size, ymin = bias.lci, ymax = bias.uci, fill = method), alpha = 0.1))
 ```
 
+Try the figure faceted:
+
+```{r samplesize}
+fig_results_all2 <- fig_results_all %>% 
+  select(-cover) %>% 
+  rename(width.value = width,
+         bias.value = bias) %>% 
+  pivot_longer(cols = 3:8, names_to = c("metric",".value"), names_pattern = "(.*)\\.(.*)")
+# from https://colorbrewer2.org/?type=qualitative&scheme=Paired&n=4
+# color blind safe and printer friendly
+color_scale <- c(boot = '#a6cee3', sim = '#1f78b4', sim2 = '#b2df8a', sim3 = '#33a02c')
+ggplot(fig_results_all2) +
+  geom_point(mapping = aes(x = sample_size, y = value, color = method, shape = method)) + 
+  geom_line(mapping = aes(x = sample_size, y = value, color = method)) + 
+  geom_ribbon(mapping = aes(x = sample_size, ymin = lci, ymax = uci, fill = method), alpha = 0.2) +
+  facet_wrap(~metric, scales = "free_y") + 
+#  theme_classic() + 
+  rlt_theme + 
+  theme(legend.position = "top", legend.title = element_blank()) +
+  scale_color_manual(values = color_scale) +
+  scale_fill_manual(values = color_scale) +
+  ylab("Relative Magnitude") + 
+  xlab("Sample Size")
+```
+
+# Zoomed in figure
+
+```{r zoomedfigure}
+
+zoom_figure <- method_comparison_1 %>% 
+  filter(sample_size == 50) %>% 
+  mutate(boot_lambdas = map_dbl(boot_TF, ~mean(.x$lambda)),
+         boot_lci = map_dbl(boot_TF, ~quantile(.$lambda, p = 0.025)),
+         boot_uci = map_dbl(boot_TF, ~quantile(.$lambda, p = 0.975)),
+         sim_all_lambdas = map(sim_TF, function(ll) map_dbl(ll, lambda)),
+         sim_lambdas = map_dbl(sim_all_lambdas, mean),
+         sim_lci = map_dbl(sim_all_lambdas, quantile, p = 0.025),
+         sim_uci = map_dbl(sim_all_lambdas, quantile, p = 0.975)) %>% 
+  select(lambdaraw, boot_lambdas, boot_lci, boot_uci, sim_lambdas, sim_lci, sim_uci) %>% 
+  pivot_longer(cols = -1, 
+              names_to = c("method", ".value"),
+              names_sep = "_") %>% 
+  arrange(method, desc(lambdas)) %>% 
+  mutate(goodci = lci < true_lambda & uci > true_lambda,
+         rownum = rep(1:100, times = 2))
+ggplot(zoom_figure) +
+  geom_point(mapping = aes(x = rownum, y = lambdas, color = goodci, shape = method)) + 
+  geom_errorbar(mapping = aes(x = rownum, ymin = lci, ymax = uci, color = goodci))+
+  geom_hline(yintercept = true_lambda, linetype = 2, color = "blue")+
+  rlt_theme + 
+  facet_wrap(~method) + 
+  scale_color_manual(values = c("TRUE" = color_scale[2], "FALSE" = color_scale[4], use.names = FALSE))+
+  ylab(expression(lambda))+
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+```
 
 
 # What about a different sampling strategy? 
@@ -408,7 +467,7 @@ results <- tibble(observations = map(1:100,
                                      function(x) sim_observations(TF, N = 500, initial_stages = initial_stages)),
        TF = map(observations, projection_matrix, fertility = "Sd", TF = TRUE),
        N = map(observations, get_state_vector),
-       Tunif = map2(TF, N, fill_transitions, P = transition_prior),
+       Tunif = map2(TF, N, fill_transitions, P = transition_prior1),
        Funif = map2(TF, N, fill_fertility, alpha = fertility_alpha, beta = fertility_beta),
        A = map(TF, ~.x$T+.x$F),
        Aunif = map2(Tunif, Funif, ~.x + .y)) %>% 
@@ -427,15 +486,14 @@ ggplot(data = results) +
   geom_hline(yintercept = lambda(TF$T + TF$F), linetype = 2, color = "blue")
 ```
 
- How about the Bayesian approach with
-oversampled data?
+How about the Bayesian approach with oversampled data?
 
 
 ```{r}
 # no set seed because using results from previous chunk.
 results <- results %>% 
   mutate(sim_TF = map2(TF, N, function(.x, .y) sim_transitions(TF = .x, 
-                      N = .y, P = transition_prior, 
+                      N = .y, P = transition_prior1, 
                       alpha = fertility_alpha, beta = fertility_beta, 
                       samples = 1000)))
 results <- results %>% 
