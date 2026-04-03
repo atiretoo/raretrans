@@ -65,7 +65,7 @@ sim_transitions <- function(TF, N, P = NULL, alpha = 0.00001, beta = 0.00001, pr
     # fill in with a uniform prior <- <- <-
     P <- matrix(1 / (order + 1), nrow = order + 1, ncol = order)
   } else {
-    if (ncol(P) != order | nrow(P) != (order + 1)) {
+    if (ncol(P) != order || nrow(P) != (order + 1)) {
       stop("Bad dimensions on P")
     }
   }

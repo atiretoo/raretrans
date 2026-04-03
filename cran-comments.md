@@ -1,6 +1,6 @@
 ## Test environments
 
-* local: macOS Tahoe 26.3.1, R 4.5.2 (aarch64-apple-darwin20)
+* local: macOS Tahoe 26.4, R 4.5.2 (aarch64-apple-darwin20)
 * GitHub Actions: ubuntu-latest (release, devel), windows-latest (release), macOS-latest (release)
 
 ## R CMD check results

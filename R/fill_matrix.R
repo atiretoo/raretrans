@@ -46,7 +46,7 @@ fill_transitions <- function(TF, N, P = NULL, priorweight = -1, returnType = "T"
     # fill in with a uniform prior <- <- <-
     P <- matrix(1 / (order + 1), nrow = order + 1, ncol = order)
   } else {
-    if (ncol(P) != order | nrow(P) != (order + 1)) {
+    if (ncol(P) != order || nrow(P) != (order + 1)) {
       stop("Bad dimensions on P")
     }
   }
@@ -54,7 +54,7 @@ fill_transitions <- function(TF, N, P = NULL, priorweight = -1, returnType = "T"
   TN <- matrix(NA, nrow = order + 1, ncol = order)
   for (i in 1:order) {
     observed <- Tmat[, i] * N[i]
-    if (priorweight > 0 & N[i] > 0) {
+    if (priorweight > 0 && N[i] > 0) {
       P[, i] <- P[, i] * priorweight * N[i]
     }
     allfates <- c(observed, N[i] - sum(observed)) + P[, i]
@@ -131,19 +131,19 @@ fill_fertility <- function(TF, N, alpha = 0.00001, beta = 0.00001, priorweight =
   Fmat <- TF$F
   order <- dim(Tmat)[1]
 
-  if (length(N) != order | sum(is.na(N)) > 0) {
+  if (length(N) != order || sum(is.na(N)) > 0) {
     stop("N isn't the correct length or has missing values.")
   }
 
-  if (is.null(dim(alpha)) & length(alpha) != 1 | is.null(dim(beta)) & length(beta) != 1) {
+  if ((is.null(dim(alpha)) && length(alpha) != 1) || (is.null(dim(beta)) && length(beta) != 1)) {
     stop("alpha or beta is not a matrix or a single value.")
   }
 
-  if (!(is.numeric(alpha) & is.numeric(beta))) {
+  if (!(is.numeric(alpha) && is.numeric(beta))) {
     stop("alpha or beta must be numeric matrices or single values.")
   }
 
-  if ((length(alpha) != order^2 | length(beta) != order^2)) {
+  if ((length(alpha) != order^2 || length(beta) != order^2)) {
     warning("length(alpha | beta) != order^2: only using first value of alpha and beta")
     alpha <- matrix(rep(alpha[1], order^2), nrow = order, ncol = order)
     beta <- matrix(rep(beta[1], order^2), nrow = order, ncol = order)
@@ -227,7 +227,7 @@ check_TF <- function(TF) {
   if(length(TF) != 2) {
     stop("TF must be a list of 2 matrices with equal dimensions")
   }
-  if(is.null(TF$T) || is.null(TF$T)) {
+  if(is.null(TF$T) || is.null(TF$F)) {
     stop("the matrices in TF must be named 'T' and 'F'")
   }
   Tmat <- TF$T

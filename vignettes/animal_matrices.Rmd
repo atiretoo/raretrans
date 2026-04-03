@@ -20,18 +20,29 @@ options(huxtable.add_colnames = FALSE,
         digits = 3)
 ```
 
-Although the paper focuses on a perennial plant data set, the same principles 
-work for animal matrices too. Small sample sizes can compromise the estimation of 
-survival and reproduction, especially if the analyst believes that matrix entries
-should vary by age, sex, or other environmental conditions. In some cases there
-are no available data, and the analysis proceeds using "guesses", AKA prior beliefs.
-Using simple prior distributions for these parameters enables the calculation
-of credible intervals for both matrix entries and derived quantities in a
-natural way.
+Although the companion paper and the other `raretrans` vignettes focus on
+perennial plant data sets, the same Bayesian principles apply to animal
+populations. Small sample sizes compromise the estimation of survival and
+reproduction whenever the analyst believes that matrix entries should vary by
+age, sex, or environmental condition. In some cases there are no data at all
+for a particular combination of stage and environment, and the analysis must
+proceed using expert opinion---what Bayesians call *prior beliefs*.
 
-This example does not use the `raretrans` functions, because the information in
-Beissinger [-@beissinger1995snailkite] is provided as means and standard 
-deviations, not as numbers of transitions. 
+Expressing those beliefs as probability distributions (rather than single point
+estimates) has two practical advantages. First, it forces the analyst to be
+explicit about how confident they are in each parameter. Second, it provides a
+principled way to propagate that uncertainty through derived quantities such as
+the asymptotic population growth rate $\lambda$, the stable stage distribution,
+or extinction risk.
+
+This vignette walks through a published Population Viability Analysis (PVA) for
+the endangered Florida Snail Kite and shows, step by step, how to re-express the
+original normal-distribution assumptions as Beta priors. The example does not use
+the `raretrans` functions directly because the published information is given as
+means and standard deviations rather than as raw transition counts. Nevertheless,
+the underlying logic---combining prior beliefs with data through conjugate
+Bayesian models---is exactly the same. A final section at the end shows how to
+connect this workflow back to `raretrans` when count data are available.
 
 
 ```{r setup}
@@ -52,16 +63,32 @@ rlt_theme <- theme(axis.title.y = element_text(colour="grey20",size=15,face="bol
 
 # Snail kites
 
-Stephen Beissinger [-@beissinger1995snailkite] developed a PVA for the 
-endangered snail kite in the Florida Everglades. A key piece of that 
-problem was a periodic variation in water levels caused by management. Kites had
-lower survival and reproduction when water levels were drawn down in 
-dry years to support irrigation. Data on radio telemetered animals and nest
-success were available for "high water" years, and anecdotal evidence was used
-to guesstimate values for "drought" and "lag" years. The model used three age 
-classes because "[a] finer age-structured model was not feasible due to small sample sizes of age-specific demographic data". Standard deviations and ranges were
-provided for some of the parameters. The methods describe survival values as drawn from
-a normal distribution. 
+## Background
+
+The Florida Snail Kite (*Rostrhamus sociabilis plumbeus*) is a wetland raptor
+that feeds almost exclusively on apple snails (*Pomacea paludosa*). Because
+snails are sensitive to water depth, periodic drought events in the Everglades
+create a direct link between hydrological management and kite demography.
+Stephen Beissinger [-@beissinger1995snailkite] developed a stage-based PVA to
+evaluate how the frequency of drought cycles affects the kite's long-term
+viability. This study is a classic example of how expert opinion fills the gaps
+left by sparse field data.
+
+## Study design and data sources
+
+Radio-telemetry and nest monitoring provided reasonably reliable survival and
+nest-success estimates for "high water" years, but data for "drought" and "lag"
+(recovery) years were far scarcer. Beissinger used a combination of field
+observations and expert judgement to assign parameter values for those
+environments. The model distinguished three age classes---fledgling, subadult,
+and adult---because small sample sizes precluded a finer age structure.
+
+The table below (reproduced from Table 2 of Beissinger
+[-@beissinger1995snailkite]) summarises the vital rates used in the PVA. For
+each combination of environmental state and age class, means, standard
+deviations, and ranges are given for both nest success and annual survival.
+Beissinger sampled these parameters from normal distributions during the
+stochastic simulations.
 
 ```{r}
 b1995_table2 <- tribble(
@@ -92,30 +119,45 @@ huxtable(b1995_table2) %>%
 
 ## Survival values
 
-In stage structured matrices generally, the survival component of the matrix is
-a multinomial because of the possibility of transitioning between more than 2 
-stages. In an age structured matrix like this one, the only possibilities are
-survival to the next stage or death, so a simple $Beta(\alpha, \beta)$ prior
-is all that is needed. The mean is given by $\alpha / \left(\alpha + \beta\right)$,
-while the variance of the distribution is 
+### Why a Beta distribution?
+
+In a stage-structured matrix with $k$ possible fates (including death),
+survival probabilities form a multinomial, and the natural conjugate prior is a
+Dirichlet distribution (the approach used by `raretrans`). In this particular
+age-structured model, however, an individual of a given age can only survive to
+the next age class or die---exactly two possible outcomes. The Binomial
+likelihood paired with a $\text{Beta}(\alpha, \beta)$ prior is therefore
+sufficient.
+
+The Beta distribution is bounded on $[0, 1]$, making it appropriate for
+probabilities. Its two parameters $\alpha$ and $\beta$ can be interpreted as
+pseudo-counts: $\alpha$ "prior survivals" and $\beta$ "prior deaths". Their
+sum $\alpha + \beta$ acts as an *effective sample size* that controls how
+concentrated the distribution is around its mean.
+
+### Moment matching: from mean and SD to $\alpha$ and $\beta$
+
+The mean and variance of a $\text{Beta}(\alpha, \beta)$ distribution are:
 
 $$
+\mu = \frac{\alpha}{\alpha + \beta}, \qquad
 \sigma^2 = \frac{\alpha \beta}{\left(\alpha + \beta\right)^2\left(\alpha + \beta + 1\right)}
 $$
 
-We have a mean and standard deviation from Table 1, and can obtain approximate $\alpha$ and $\beta$ as follows
-
+Beissinger [-@beissinger1995snailkite] reports $\mu$ and $\sigma$ (Table 2). We
+can recover approximate $\alpha$ and $\beta$ by *moment matching*---equating the
+distribution's theoretical moments to the observed summary statistics. Defining
+the auxiliary quantity $\nu$:
 
 \begin{align*}
-\nu = & \frac{\mu\left(1-\mu\right)}{\sigma^2} \\
-\alpha = & \nu\mu \\
-\beta = & \left(1-\mu\right) \nu
+\nu    &= \frac{\mu\left(1-\mu\right)}{\sigma^2} \\
+\alpha &= \nu\,\mu \\
+\beta  &= \left(1-\mu\right)\,\nu
 \end{align*}
 
-
-
-as long as $\mu\left(1-\mu\right) < \sigma^2$. This condition is met for all the values in 
-Beissinger's Table 2. 
+This conversion is valid as long as $\sigma^2 < \mu(1 - \mu)$, which is
+satisfied for all entries in Beissinger's Table 2. The code below performs
+this conversion and displays the resulting $\alpha$ and $\beta$ values.
 
 ```{r}
 kite_parms <- b1995_table2 %>% 
@@ -154,19 +196,37 @@ kite_parms %>%
   
 ```
 
-One of the benefits of articulating the beliefs this way is that the reader can
-immediately see how much confidence the analyst has placed in each of the parameter estimates.
-The sum of $\alpha$ and $\beta$ is effective sample size. So we have less confidence in the 
-estimates of nest success in lag and drought years than high water years, as stated
-in Beissinger [-@beissinger1995snailkite]. However, within each environmental 
-state we have more confidence in the survival
-estimates of fledgling than subadult or adult stages, and less confidence in
-estimates from high water years than lag years. Both of these are inconsistent with
-the prior beliefs stated by Beissinger[-@beissinger1995snailkite], but are a 
-consequence of fixing the standard deviation of the estimates. 
-Fixing the standard deviation gives a consistent belief about
-precision if the parameter is normally distributed, because the mean and standard deviation
-are independent. This is not true of a Beta distribution. 
+### Interpreting the effective sample size
+
+One of the key benefits of re-expressing beliefs as Beta parameters is
+transparency: the sum $\alpha + \beta$ is the *effective sample size*, so a
+reader can immediately see how much confidence the analyst has placed in each
+estimate.
+
+Looking at the table above, nest-success estimates carry less confidence in
+drought and lag years than in high water years, consistent with what Beissinger
+[-@beissinger1995snailkite] states qualitatively. For survival, however, two
+patterns emerge that are *inconsistent* with Beissinger's intended beliefs:
+
+1. Within each environmental state, fledgling survival has a *larger* effective
+   sample size than subadult or adult survival. This happens because fledgling
+   survival is lower (mean $\approx 0.5$--$0.9$), so $\mu(1-\mu)$ is larger
+   relative to a fixed $\sigma^2$.
+2. High water year estimates appear *less* confident (smaller $n$) than lag year
+   estimates, despite being based on the best data.
+
+Both artifacts arise because Beissinger fixed the standard deviation at 0.03 or
+0.10 regardless of the mean. For a normally distributed parameter, the mean and
+standard deviation are independent, so a fixed SD implies a fixed level of
+precision. For a Beta distribution, however, the variance depends on both the
+mean and the concentration. Fixing $\sigma$ while changing $\mu$ implicitly
+changes the effective sample size in counter-intuitive ways.
+
+This observation has a practical lesson: when converting from a normal
+parameterisation to a Beta, it is worth checking whether the implied effective
+sample sizes are scientifically reasonable. If they are not, the analyst may
+want to specify $\alpha$ and $\beta$ directly rather than relying on moment
+matching.
 
 ```{r}
 pdf_seq <- seq(-0.2,1.2,0.001)
@@ -209,34 +269,75 @@ ggplot(data = kite_parms2) +
   theme_classic()
 ```
 
-The differences in confidence are not easy to see in the density plots. The
-normal distribution is an excellent approximation to the beta distribution
-except for subadult and adult stages in high water years. Then the
-normal distribution has ~5% probability of values above 1. This was accounted
-for by rejecting inadmissible values and drawing another (Beissinger, Personal communication).
+### Comparing Beta and normal priors
+
+The figure above overlays the Beta distribution (red) with the truncated normal
+(blue) used in the original PVA. Several points are worth noting:
+
+- For most stage--environment combinations the two distributions are nearly
+  indistinguishable, confirming that the normal approximation works well when
+  the mean is far from 0 or 1 and the standard deviation is small.
+- The approximation breaks down for subadult and adult survival in high water
+  years, where mean survival is 0.95. Here the normal distribution assigns
+  roughly 5% probability to values above 1.0---an impossible range for a
+  probability. Beissinger (personal communication) dealt with this by rejecting
+  inadmissible draws and resampling, effectively producing a *truncated* normal.
+- The truncation has little practical effect in this case, but in general it
+  shifts the effective mean upward and can subtly bias simulation results.
+
+The Beta distribution avoids these boundary issues entirely because it is
+defined on $[0, 1]$ by construction. This is one of the simplest arguments
+for preferring Beta (or Dirichlet) priors over normal distributions when
+modelling probabilities.
 
 
 ## Reproductive rates
 
-Beissinger [-@beissinger1995snailkite] only provides standard deviations for nest success, the
-probability of a nest fledging one or more chicks (Table 1). The reproductive rates 
-of the matrices are the product of nest success, the number of young fledged per 
-successful nest, the proportion of the population nesting, and the number of
-nest attempts per year. Other than nest success all of these are treated as
-fixed values. A value for the number of fledglings per successful nest was
-not provided, but Snyder et al. [-@snyder1989snailkite] had an average of ~ 2 per nest across
-all sites and years. Although this value could be used as is, the authors' Table 5
-provides actual counts of young per successful nest, 55, 110, and 47 nests having
-1, 2 or 3 young respectively. This knowledge is perfectly represented as a 
-multinomial variable with a Dirichlet prior. Although the mean success does not
-vary across environmental states, the number of nests sampled does, and this
-should be reflected in the degree of confidence placed in each distribution. This
-representation also includes demographic stochasticity, so we will use a fixed
-value of 2 in what follows. 
+### Components of reproduction
 
-Beissinger [-@beissinger1995snailkite] used normal distributions for the uncertainty
-in nest success, but Table 3 in Snyder et al. [-@snyder1989snailkite] provides
-values that can be converted into Beta priors for a binomial variable. 
+In the snail kite model, the fertility entry in column $j$ of the matrix is the
+product of four components:
+
+$$
+F_j = (\text{proportion nesting})_j \;\times\;
+      (\text{nest attempts per year})_j \;\times\;
+      (\text{nest success})_j \;\times\;
+      (\text{young per successful nest})
+$$
+
+Beissinger [-@beissinger1995snailkite] treated all components except nest
+success as fixed values. For nest success---the probability that a nest produces
+at least one fledgling---means, standard deviations, and ranges were provided
+and sampled from normal distributions during the simulation.
+
+### Nest success as a Beta variable
+
+Nest success is inherently a probability (bounded between 0 and 1), so a Beta
+distribution is the natural choice. Snyder et al. [-@snyder1989snailkite]
+provide raw counts of successful and failed nests (their Table 3) that can be
+converted directly into Beta parameters: $\alpha$ = number of successful nests
+and $\beta$ = number of failed nests. This is more informative than the moment-
+matching approach because it uses the actual sample sizes rather than summary
+statistics.
+
+### Young per successful nest
+
+Snyder et al. [-@snyder1989snailkite] report an average of approximately 2
+young per successful nest. Their Table 5 provides the actual distribution: 55,
+110, and 47 nests produced 1, 2, or 3 young, respectively. This count data
+could be represented as a multinomial variable with a Dirichlet prior---exactly
+the approach that `raretrans::fill_transitions()` uses for transition
+probabilities. Although the mean number of young does not vary across
+environmental states, the sample sizes do, and this should be reflected in the
+confidence placed in each distribution. For simplicity, we use a fixed value of
+2 young per successful nest in what follows.
+
+### Comparing prior sources
+
+The code below builds Beta priors for nest success from the Snyder et al.
+[-@snyder1989snailkite] counts and compares them with the moment-matched Beta
+and truncated normal distributions implied by Beissinger
+[-@beissinger1995snailkite].
 
 ```{r ns-figure-data}
 repro_parms <- tribble(
@@ -277,29 +378,54 @@ ggplot(data = filter(repro_parms2, age_class != "Fledgling"),
   rlt_theme
 ```
 
-The confidence implied by the choices of the mean and variance in Beissinger [-@beissinger1995snailkite] 
-is much less than the confidence implied by the sample sizes given in 
-Snyder et al. [-@snyder1989snailkite]. It is possible that this is a deliberate
-choice because uncertainty in the other components of reproductive success was
-assumed to be zero.
+### Interpretation
 
-Another advantage of using simple count priors for binomial and multinomial
-variables is that sampling from those variables automatically obeys restrictions
-on the numeric values. Beissinger [-@beissinger1995snailkite] sampled from
-normal distributions for survival and nest success. Many of these samples
-would have fallen outside the range [0,1] for a probability. Values outside this
-range were rejected and resampled (Beissinger, personal communication), giving 
-"truncated" normal distributions. For nest success, this creates noticeable
-differences only in lag and drought years. In drought years particularly, the 
-truncated normal distribution produces nest success values much higher than
-either of the parameterizations of the Beta distribution. The mean of the
-truncated normal is `r integrate(function(x)x*dnorm(x, mean = 0.03, sd = 0.1)/pnorm(0, mean = 0.03, sd = 0.1, lower.tail = FALSE), lower = 0, upper  = 1)$value`, 3 times larger than the intended
-mean.
+The figure reveals an important discrepancy. The yellow densities (Snyder et al.
+counts) are much narrower than the red densities (Beissinger moment-matched
+Beta), meaning the raw count data imply substantially more confidence in nest
+success than the summary statistics suggest. This may reflect a deliberate
+choice: because the other components of reproduction (proportion nesting,
+nest attempts, young per nest) were treated as known constants, Beissinger may
+have inflated the variance on nest success to partially compensate for the
+missing uncertainty in those components.
+
+The blue densities (truncated normal from Beissinger) highlight a second issue.
+For drought years, where mean nest success is only 0.03, the normal distribution
+with $\sigma = 0.10$ assigns substantial probability to negative values. After
+truncation to $[0, 1]$, the effective mean shifts upward to
+`r round(integrate(function(x)x*dnorm(x, mean = 0.03, sd = 0.1)/pnorm(0, mean = 0.03, sd = 0.1, lower.tail = FALSE), lower = 0, upper = 1)$value, 3)`---roughly
+three times the intended value of 0.03. This systematic bias means the original
+PVA likely *overestimated* reproduction in drought years.
+
+The Beta distribution avoids this problem entirely: it is defined on $[0, 1]$,
+so no truncation or rejection sampling is needed, and the mean remains exactly
+where the analyst intends. This is a compelling practical reason to prefer
+Beta priors for probabilities, especially when the mean is close to the
+boundaries.
 
 # Building the matrices
 
-Now that we have distributions for the matrix entries, we can create a function
-that returns a matrix with values sampled from the relevant distributions.
+Now that we have prior distributions for every vital rate, we can assemble them
+into a function that returns one realisation of the $3 \times 3$ age-structured
+projection matrix. Each call to this function draws survival probabilities from
+Beta distributions and combines them with nest success (also drawn from a Beta)
+and the fixed reproductive components to produce a complete matrix.
+
+The matrix structure for the snail kite is:
+
+$$
+\mathbf{A} = \begin{pmatrix}
+0     & F_2       & F_3       \\
+s_1   & 0         & 0         \\
+0     & s_2       & s_3
+\end{pmatrix}
+$$
+
+where $s_i$ is age-specific survival, $F_j$ is the fertility contribution from
+age class $j$, and adults ($s_3$) remain in the adult class indefinitely. Note
+that fledgling survival ($s_1$) enters only through the fertility calculation
+(as a pre-breeding census correction), so the subdiagonal entry $A_{2,1}$
+actually represents subadult survival.
 
 ```{r}
 # fix up parameter dataframes
@@ -326,8 +452,18 @@ snailkite_A("Drought year")
 snailkite_A("Lag year")
 ```
 
-We can then draw many samples of each matrix to obtain credible intervals
-on derived quantities like the asymptotic growth rate $\lambda$. 
+## Propagating uncertainty to $\lambda$
+
+With the matrix-generating function in hand, we can perform a Monte Carlo
+simulation: draw many matrices for each environmental state and compute the
+dominant eigenvalue $\lambda$ (asymptotic population growth rate) for each one.
+The resulting distribution of $\lambda$ values is a *posterior predictive
+distribution* that reflects all the uncertainty encoded in our priors.
+
+A population is expected to grow when $\lambda > 1$ and decline when
+$\lambda < 1$. By examining the proportion of simulated $\lambda$ values that
+fall below 1, we get an intuitive measure of extinction risk for each
+environmental state.
 
 ```{r}
 results <- tibble(
@@ -343,7 +479,43 @@ ggplot(data = results,
   rlt_theme
 ```
 
-We can reproduce extinction risk plots as in Beissinger [-@beissinger1995snailkite],
-if that is necessary. 
+The histograms show that drought years produce $\lambda$ values well below 1
+(population decline), high water years are consistently above 1 (population
+growth), and lag years fall near or slightly below 1. The spread of each
+histogram reflects parameter uncertainty: wider distributions indicate less
+confidence in the predicted growth rate. This kind of output is precisely what
+a PVA needs to assess the probability of decline under alternative management
+scenarios.
+
+We could extend this further to reproduce the full extinction risk analysis in
+Beissinger [-@beissinger1995snailkite] by simulating sequences of environmental
+states and projecting the population forward in time.
+
+# Connection to `raretrans`
+
+This vignette built Beta priors by hand because the published data were
+reported as means and standard deviations rather than as raw transition counts.
+When individual-level mark--recapture or census data *are* available---as in the
+orchid examples in the other vignettes---the `raretrans` package automates the
+entire workflow:
+
+- **`fill_transitions()`** combines observed fate counts with a
+  Dirichlet prior (the multivariate generalisation of the Beta) to produce
+  regularised transition probabilities. This is the direct analogue of the
+  moment-matching step above, but using counts instead of summary statistics.
+- **`fill_fertility()`** does the same for reproduction using a
+  Gamma--Poisson conjugate model.
+- **`sim_transitions()`** draws posterior matrices in a single call,
+  replacing the custom `snailkite_A()` function we wrote above.
+- **`transition_CrI()`** and its companion plotting functions
+  (`plot_transition_CrI()`, `plot_transition_density()`) produce the credible
+  intervals and density visualisations that we computed manually for the kite.
+
+The conceptual framework is identical in both cases: specify prior beliefs,
+update them with data, and propagate the resulting uncertainty to quantities of
+ecological interest. `raretrans` simply packages the most common version of this
+workflow---Dirichlet--multinomial transitions with count data---into a
+convenient set of functions that work with the standard `TF` list format used
+by `popbio`.
 
 # Literature cited
