@@ -13,3 +13,4 @@ docs/
 vignettes/*.html
 /doc/
 /Meta/
+data-raw/*.rda
