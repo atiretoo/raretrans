@@ -20,3 +20,4 @@
 ^tests/testthat/random_helper_code.R$
 ^\.github$
 ^vignettes/images$
+^raretrans.code-workspace$
