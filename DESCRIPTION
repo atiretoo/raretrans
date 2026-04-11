@@ -51,6 +51,7 @@ Suggests:
     bslib,
     covr,
     dplyr,
+    formatR,
     gridExtra,
     huxtable,
     knitr,
