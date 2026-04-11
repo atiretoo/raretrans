@@ -6,7 +6,7 @@
 [![Project Status:
 Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/atiretoo/raretrans/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/atiretoo/raretrans/actions/workflows/R-CMD-check.yaml)
-[![codecov](https://codecov.io/gh/atiretoo/raretrans/branch/master/graph/badge.svg)](https://codecov.io/gh/atiretoo/raretrans)
+[![codecov](https://codecov.io/gh/atiretoo/raretrans/branch/master/graph/badge.svg)](https://app.codecov.io/gh/atiretoo/raretrans)
 
 Functions to create matrix population models from a combination of data
 on stage/age transitions and Bayesian prior information. This
@@ -111,14 +111,14 @@ fill_fertility(TF)
 | 05 | Prior information | Effect of priors on transitions and fertility |
 | 06 | Animal matrices | Examples with animal population data |
 
-Browse all vignettes at <https://atiretoo.github.io/raretrans>.
+Browse all vignettes at <https://atiretoo.github.io/raretrans/>.
 
 ## Getting Help
 
 - Report bugs or request features at
   <https://github.com/atiretoo/raretrans/issues>
 - Read the full function reference at
-  <https://atiretoo.github.io/raretrans/reference>
+  <https://atiretoo.github.io/raretrans/reference/>
 
 ## Reference
 
