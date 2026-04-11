@@ -8,14 +8,10 @@ Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repost
 [![R-CMD-check](https://github.com/atiretoo/raretrans/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/atiretoo/raretrans/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/atiretoo/raretrans/branch/master/graph/badge.svg)](https://codecov.io/gh/atiretoo/raretrans)
 
-Functions to correct biased transition and fertility estimates in
-population projection matrices caused by small sample sizes. Small or
-short-term studies frequently produce **structural zeros** (biologically
-possible transitions never observed) and **structural ones** (transitions
-estimated at 100% survival, stasis, or mortality that are biologically
-implausible). Both distort matrix structure and bias estimates of
-population growth. `raretrans` uses Bayesian priors to regularise
-estimates from rare or unobserved events (“holey matrices”).
+Functions to create matrix population models from a combination of data
+on stage/age transitions and Bayesian prior information. This
+compensates for structural problems caused by missing observations of
+rare transitions (“holey matrices”).
 
 Based on methods described in:
 
@@ -28,8 +24,8 @@ Based on methods described in:
 
 - R \>= 4.1.0
 - Core package dependencies: `ggplot2`, `rlang`
-- Vignette dependencies: `dplyr`, `tidyr`, `purrr`, `tibble`, `popbio`,
-  `popdemo`, `huxtable`, `MultinomialCI`
+- Vignette dependencies: `tidyverse`, `popbio`, `huxtable`, `popdemo`,
+  `googledrive`
 
 > **Note:** The core functions work on any R \>= 4.1.0. Vignettes
 > require R \>= 4.1.0 due to dependencies in `popdemo`, `dplyr`, and
@@ -39,13 +35,8 @@ Based on methods described in:
 
 ## Installation
 
-`raretrans` is available from CRAN:
-
-``` r
-install.packages("raretrans")
-```
-
-Or install the development version from GitHub with:
+`raretrans` is not currently available from CRAN. Install from GitHub
+with:
 
 ``` r
 # install.packages("remotes")  # if needed
@@ -89,6 +80,15 @@ a transition matrix `T` and a fertility matrix `F`. These can be
 constructed by hand or created with
 `popbio::projection.matrix(..., TF = TRUE)` from individual-level
 transition data.
+
+## Interactive Application
+
+`raretrans` includes an interactive Shiny application to explore the
+effects of different Bayesian priors on transition matrices dynamically.
+
+``` r
+raretrans::run_app()
+```
 
 ## Quick Start
 

@@ -48,8 +48,10 @@ Imports:
     rlang,
     stats
 Suggests:
+    bslib,
     covr,
     dplyr,
+    formatR,
     gridExtra,
     huxtable,
     knitr,
@@ -59,6 +61,7 @@ Suggests:
     purrr,
     rmarkdown,
     RColorBrewer,
+    shiny,
     testthat,
     tibble,
     tidyr

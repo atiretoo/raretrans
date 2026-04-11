@@ -82,6 +82,14 @@ constructed by hand or created with
 `popbio::projection.matrix(..., TF = TRUE)` from individual-level
 transition data.
 
+## Interactive Application
+
+`raretrans` includes an interactive Shiny application to explore the effects of different Bayesian priors on transition matrices dynamically.
+
+```{r, eval=FALSE}
+raretrans::run_app()
+```
+
 ## Quick Start
 ```{r, eval = FALSE}
 library(raretrans)

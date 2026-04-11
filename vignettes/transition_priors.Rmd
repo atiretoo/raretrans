@@ -416,6 +416,14 @@ ggplot(diffPriors, aes(x=lmbda, y=lprior)) +
   theme_bw() + rlt_theme
 ```
 
+### Interactive Exploration
+
+You can interactively explore the posterior beta densities and the effects of these informative priors across different populations and years of *Lepanthes eltoroensis* by running the built-in Shiny application:
+
+```{r, eval=FALSE}
+raretrans::run_app()
+```
+
 # Obtaining credible intervals on vital rates and $\lambda$
 
 Recognizing that the observed transitions are realizations of a Dirichlet distribution gives us a very simple way to derive credible intervals for the transition probabilities in our matrix. The marginal distribution of a single transition is a beta distribution as described above, and we can simply report the 2.5% and 97.5% percentiles of that distribution to provide a credible interval on a transition rate. These intervals do shift and shrink as the weight on the prior increases.
