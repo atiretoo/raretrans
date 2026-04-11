@@ -35,24 +35,17 @@ Based on methods described in:
 
 ## Installation
 
-`raretrans` is not currently available from CRAN. Install from GitHub
-with:
+Install the stable release from CRAN:
+
+``` r
+install.packages("raretrans")
+```
+
+Or install the development version from GitHub:
 
 ``` r
 # install.packages("remotes")  # if needed
 remotes::install_github("atiretoo/raretrans")
-```
-
-To install with vignettes (requires R \>= 4.1.0):
-
-``` r
-remotes::install_github("atiretoo/raretrans", build_vignettes = TRUE)
-```
-
-If vignette installation fails, install without them and read online:
-
-``` r
-remotes::install_github("atiretoo/raretrans", build_vignettes = FALSE)
 ```
 
 The code and data used to produce the published paper are tagged

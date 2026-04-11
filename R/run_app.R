@@ -1,5 +1,6 @@
 #' Run the interactive Shiny application for Bayesian transition priors
 #'
+#' @return No return value, called for side effects (launches a Shiny app).
 #' @export
 #'
 #' @examples

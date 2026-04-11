@@ -1,23 +1,15 @@
-## Test environments
-
-* local: macOS Tahoe 26.4, R 4.5.2 (aarch64-apple-darwin20)
-* GitHub Actions: ubuntu-latest (release, devel), windows-latest (release), macOS-latest (release)
-
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 note
 
-## Resubmission notes
+* checking HTML version of manual ... NOTE
+  Skipping checking HTML validation: local HTML Tidy version is too old.
+  This note does not appear on CRAN's check infrastructure.
 
-This is a resubmission of version 1.0.2. Changes since 1.0.1:
+## Test environments
 
-* Added three new exported functions: `transition_CrI()`, `plot_transition_CrI()`,
-  and `plot_transition_density()`
-* Replaced `tidyverse` in Suggests with the specific packages used
-  (`dplyr`, `tidyr`, `purrr`, `tibble`)
-* Removed `devtools` and `googledrive` from Suggests
-* Cleaned up vignette build artefacts and developer-only code chunks
-* All vignettes build cleanly with 0 errors, 0 warnings, 0 notes
+* local macOS Tahoe 26.4.1 (aarch64-apple-darwin20), R 4.5.3
+* win-builder (R-devel)
 
 ## Downstream dependencies
 

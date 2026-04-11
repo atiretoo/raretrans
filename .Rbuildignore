@@ -19,3 +19,6 @@
 ^\.github$
 ^vignettes/images$
 ^raretrans.code-workspace$
+^raretrans$
+^check_package\.R$
+^cran-comments\.md$

@@ -25,11 +25,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Raymond Tremblay \email{raymond.tremblay@upr.edu} (\href{https://orcid.org/0000-0002-8588-4372}{ORCID})
+\strong{Maintainer}: Raymond Tremblay \email{raymond.tremblay@upr.edu} (\href{https://orcid.org/0000-0002-8588-4372}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Andrew Tyre \email{atyre2@gmail.com} (\href{https://orcid.org/0000-0001-9736-641X}{ORCID})
+  \item Andrew Tyre \email{atyre2@gmail.com} (\href{https://orcid.org/0000-0001-9736-641X}{ORCID}) [copyright holder]
   \item Maria-Eglee Perez \email{mariaeglee@gmail.com} (\href{https://orcid.org/0000-0001-8641-8405}{ORCID})
 }
 

@@ -6,6 +6,9 @@
 \usage{
 run_app()
 }
+\value{
+No return value, called for side effects (launches a Shiny app).
+}
 \description{
 Run the interactive Shiny application for Bayesian transition priors
 }
