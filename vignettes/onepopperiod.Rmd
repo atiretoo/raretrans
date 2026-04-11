@@ -276,6 +276,8 @@ ggplot(data = alltogethernow,
 The transition rate from seedling to juvenile shrinks when the prior sample size is too large. 
 In general the prior sample size should be less than the observed sample size. 
 
+> **Interactive Exploration:** To visually test the effects of differing prior weights and explore posterior probability densities without writing code, you can launch the interactive Shiny app using `raretrans::run_app()`.
+
 ## Credible intervals on $\lambda$
 
 Obtaining credible intervals on the asymptotic growth rate, $\lambda$, requires simulating matrices 
