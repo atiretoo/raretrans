@@ -25,6 +25,7 @@ reference:
     contents:
       - fill_transitions
       - fill_fertility
+      - run_app
   - title: "Simulation"
     desc: "Simulate posterior matrices"
     contents:
@@ -42,7 +43,6 @@ reference:
   - title: "Data"
     contents:
       - L_elto
-      - document_data
 
 articles:
   - title: "Vignettes"
