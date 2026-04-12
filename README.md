@@ -31,7 +31,7 @@ Based on methods described in:
 > require R \>= 4.1.0 due to dependencies in `popdemo`, `dplyr`, and
 > `purrr`. If you are on an older version of R, install without
 > vignettes (see below) and read them online at
-> <https://atiretoo.github.io/raretrans>.
+> <https://atiretoo.github.io/raretrans/>.
 
 ## Installation
 
@@ -128,5 +128,6 @@ and Interpretation* (2nd ed.). Sinauer Associates.
 ## Code of Conduct
 
 Please note that the `raretrans` project is released with a [Contributor
-Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project,
-you agree to abide by its terms.
+Code of
+Conduct](https://github.com/atiretoo/raretrans/blob/master/CODE_OF_CONDUCT.md).
+By contributing to this project, you agree to abide by its terms.
