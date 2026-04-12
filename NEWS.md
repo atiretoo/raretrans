@@ -1,4 +1,4 @@
-# raretrans (development version)
+# raretrans 1.0.4
 
 # raretrans 1.0.3
 
