@@ -32,10 +32,10 @@ Description: Provides functions to correct biased transition and fertility
     for reproduction, allowing analysts to incorporate prior biological
     knowledge and regularise estimates from rare or unobserved events.
     Includes functions to compute marginal posterior credible intervals for
-    all transition probabilities ('transition_CrI()'), visualise those
-    intervals as point-range plots ('plot_transition_CrI()'), and display
+    all transition probabilities (transition_CrI()), visualise those
+    intervals as point-range plots (plot_transition_CrI()), and display
     the full posterior beta density for each matrix entry
-    ('plot_transition_density()'). Methods are described in Tremblay et al.
+    (plot_transition_density()). Methods are described in Tremblay et al.
     (2021) <doi:10.1016/j.ecolmodel.2021.109526>.
 URL: https://atiretoo.github.io/raretrans/,
     https://github.com/atiretoo/raretrans

@@ -13,7 +13,7 @@ No return value, called for side effects (launches a Shiny app).
 Run the interactive Shiny application for Bayesian transition priors
 }
 \examples{
-\dontrun{
+if(interactive()){
 raretrans::run_app()
 }
 }

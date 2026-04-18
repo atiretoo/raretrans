@@ -4,7 +4,7 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' if(interactive()){
 #' raretrans::run_app()
 #' }
 run_app <- function() {
