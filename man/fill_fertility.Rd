@@ -43,22 +43,30 @@ Assumes that only one stage reproduces ... needs generalizing.
 }
 \examples{
 # Build a simple 3-stage TF list (transition + fertility matrices)
-T_mat <- matrix(c(0.5, 0.3, 0.0,
-                  0.2, 0.4, 0.1,
-                  0.0, 0.1, 0.7), nrow = 3, ncol = 3)
-F_mat <- matrix(c(0.0, 0.0, 1.5,
-                  0.0, 0.0, 0.0,
-                  0.0, 0.0, 0.0), nrow = 3, ncol = 3)
+T_mat <- matrix(c(
+  0.5, 0.3, 0.0,
+  0.2, 0.4, 0.1,
+  0.0, 0.1, 0.7
+), nrow = 3, ncol = 3)
+F_mat <- matrix(c(
+  0.0, 0.0, 1.5,
+  0.0, 0.0, 0.0,
+  0.0, 0.0, 0.0
+), nrow = 3, ncol = 3)
 TF <- list(T = T_mat, F = F_mat)
-N  <- c(10, 5, 8)
+N <- c(10, 5, 8)
 
 # Only adults (stage 3) reproduce; mark non-reproducing entries with NA
-alpha_mat <- matrix(c(NA, NA, 0.5,
-                      NA, NA, NA,
-                      NA, NA, NA), nrow = 3, ncol = 3)
-beta_mat  <- matrix(c(NA, NA, 1.0,
-                      NA, NA, NA,
-                      NA, NA, NA), nrow = 3, ncol = 3)
+alpha_mat <- matrix(c(
+  NA, NA, 0.5,
+  NA, NA, NA,
+  NA, NA, NA
+), nrow = 3, ncol = 3)
+beta_mat <- matrix(c(
+  NA, NA, 1.0,
+  NA, NA, NA,
+  NA, NA, NA
+), nrow = 3, ncol = 3)
 
 # Default: return filled fertility matrix F
 fill_fertility(TF, N, alpha = alpha_mat, beta = beta_mat)
