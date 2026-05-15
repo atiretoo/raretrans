@@ -15,7 +15,7 @@ where vector recycling caused the β posterior to be miscomputed when
   - macos-latest (R release)
   - windows-latest (R release)
   - ubuntu-latest (R release, R-devel, R-oldrel-1)
-* win-builder (planned: R-devel via `devtools::check_win_devel()`)
+* win-builder: R-devel (Status: OK)
 
 ## Downstream dependencies
 

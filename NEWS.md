@@ -9,11 +9,14 @@
   (#5, #6). Thanks to Drew Tyre for the fix.
 
 ## Vignettes
-* `transition_priors`: wrapped `MultinomialCI` calls in a `requireNamespace()`
-  guard so the vignette still builds when `MultinomialCI` is not installed
-  (e.g. when its CRAN macOS binary is temporarily unavailable).
+* `transition_priors`: removed the multinomial confidence interval overlay
+  on the credible-intervals figure. The `MultinomialCI` package is no
+  longer accessible via CRAN's mainstream repositories, so the comparison
+  layer has been dropped. The beta-density panels (the main point of the
+  figure) are unchanged.
 
 ## DESCRIPTION
+* Removed `MultinomialCI` from `Suggests` (no longer used in the vignette).
 * Removed `covr` from `Suggests`: no CI step uploaded coverage, so the
   dependency was unused.
 

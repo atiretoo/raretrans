@@ -429,37 +429,37 @@ raretrans::run_app()
 Recognizing that the observed transitions are realizations of a Dirichlet distribution gives us a very simple way to derive credible intervals for the transition probabilities in our matrix. The marginal distribution of a single transition is a beta distribution as described above, and we can simply report the 2.5% and 97.5% percentiles of that distribution to provide a credible interval on a transition rate. These intervals do shift and shrink as the weight on the prior increases.
 
 ```{r credibleIntervals1, echo=FALSE, fig.width = 7, fig.height = 7, fig.cap="Confidence limits or Credible intervals for transition probabilities out of seedling stage in Population 250, year 5. Shaded bands correspond to 50% (darkest), 90%, 95% and 99.9% (lightest) credible intervals. Smaller intervals are not visible in the p->a transitions when the upper boundary of the interval is smaller than 0.01. Labels are median (lower 95% CI, upper 95% CI). Note that where the median and lower interval are equal to 0.001, the actual value is < 0.001.", warning=FALSE}
-# get multinomial confidence interval for Likelihood based interval on NONE
-myfunc <- function(x){
-  colnames(x) <- c("lcl", "ucl")
-  x
-}
-# this doesn't give the same result as the beta distribution.
-# MultinomialCI is in Suggests; if it is not installed (e.g. on a platform
-# where the CRAN binary is temporarily unavailable), fall back to an empty
-# data frame so the plot still renders without the multinomial CI overlay.
-if (requireNamespace("MultinomialCI", quietly = TRUE)) {
-  mnCI <- list(ci_95 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.05),
-               ci_80 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.2),
-               ci_50 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.5)) %>%
-    map(myfunc) %>%
-    map(as_data_frame) %>%
-    bind_rows(.id = "interval_width")%>%
-    mutate(p = rep(c(1, 7, 0, 3) / 11, times=3),
-           prior = factor("None", levels = c("None", "Uninformative", "RLT, w = 1", "RLT, w = 0.5N", "RLT, w = N")),
-           transition =  factor(rep(c("s to s", "s to j", "s to a", "s to m"), times=3), levels = c("s to s", "s to j", "s to a", "s to m"))) %>%
-    filter(transition != "s to m")
-} else {
-  message("MultinomialCI not installed; rendering plot without multinomial CI overlay.")
-  mnCI <- tibble(
-    interval_width = character(0),
-    lcl = numeric(0),
-    ucl = numeric(0),
-    p = numeric(0),
-    prior = factor(character(0), levels = c("None", "Uninformative", "RLT, w = 1", "RLT, w = 0.5N", "RLT, w = N")),
-    transition = factor(character(0), levels = c("s to s", "s to j", "s to a", "s to m"))
-  )
-}
+
+# ---------------------------------------------------------------------------
+# The figure originally included a Sison-Glaz multinomial confidence interval
+# overlay (horizontal error bars on the "None" row) computed with the
+# MultinomialCI package. MultinomialCI is no longer available via CRAN's
+# mainstream repositories, so the overlay was removed for the 1.0.5 release.
+# To restore the comparison, install MultinomialCI from a non-CRAN source
+# (e.g. the cran/MultinomialCI GitHub mirror) and uncomment the block below
+# plus the corresponding geom layers / scale_size_manual at the bottom of
+# the ggplot chain.
+#
+# myfunc <- function(x) {
+#   colnames(x) <- c("lcl", "ucl")
+#   x
+# }
+# mnCI <- list(
+#   ci_95 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.05),
+#   ci_80 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.2),
+#   ci_50 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.5)
+# ) %>%
+#   map(myfunc) %>%
+#   map(as_data_frame) %>%
+#   bind_rows(.id = "interval_width") %>%
+#   mutate(
+#     p = rep(c(1, 7, 0, 3) / 11, times = 3),
+#     prior = factor("None", levels = c("None", "Uninformative", "RLT, w = 1", "RLT, w = 0.5N", "RLT, w = N")),
+#     transition = factor(rep(c("s to s", "s to j", "s to a", "s to m"), times = 3),
+#                         levels = c("s to s", "s to j", "s to a", "s to m"))
+#   ) %>%
+#   filter(transition != "s to m")
+# ---------------------------------------------------------------------------
 
 xx <- crossing(prior = c("None", "Uninformative", "RLT, w = 1", "RLT, w = 0.5N", "RLT, w = N"),
          transition = c("s to s", "s to j", "s to a", "s to m"),
@@ -529,9 +529,11 @@ ggplot(filter(xx, transition != "s to m", prior != "None"), aes(x = prob, y=dens
   geom_area(data = function(x)x[x$in50,], alpha = 1) + 
   geom_line(aes(y=prior_dens)) + 
   theme_classic() +
-  geom_errorbarh(data = mnCI, mapping = aes(x = p, xmin=lcl, xmax=ucl, size=interval_width, y = 1))+
-  geom_point(data = mnCI, mapping = aes(x=p, y=1), color = "white") +
-  facet_grid(prior~transition) + #, labeller=label_wrap_gen(width = 15)) + 
+  # To restore the multinomial CI overlay, uncomment the next two lines
+  # (requires the `mnCI` block above to be uncommented as well):
+  # geom_errorbarh(data = mnCI, mapping = aes(x = p, xmin = lcl, xmax = ucl, size = interval_width, y = 1)) +
+  # geom_point(data = mnCI, mapping = aes(x = p, y = 1), color = "white") +
+  facet_grid(prior~transition) + #, labeller=label_wrap_gen(width = 15)) +
   xlab("Transition Probability") + 
   ylab("Probability Density") + 
   ylim(c(0,15)) + 
@@ -543,10 +545,9 @@ ggplot(filter(xx, transition != "s to m", prior != "None"), aes(x = prob, y=dens
             size=12/.pt, hjust=1) + 
   rlt_theme + theme(panel.spacing = unit(1, "lines"),
                     strip.text = element_text(size=11)) +
-  scale_x_continuous(breaks = c(0,0.5,1.0)) + 
-  scale_size_manual(values = 
-                      c("ci_50"=3, "ci_80" = 2, "ci_95" = 1),
-                    guide = FALSE)
+  scale_x_continuous(breaks = c(0,0.5,1.0))
+  # + scale_size_manual(values = c("ci_50" = 3, "ci_80" = 2, "ci_95" = 1),
+  #                     guide = FALSE)  # restore if multinomial CI overlay is re-enabled
 ```
 
 Obtaining credible intervals on $\lambda$ requires simulation, because it is difficult (or maybe impossible) to use the characteristic equation to combine the probability distributions of the matrix entries to obtain the distribution of $\lambda$. 
