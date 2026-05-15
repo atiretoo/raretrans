@@ -55,7 +55,6 @@ Suggests:
     gridExtra,
     huxtable,
     knitr,
-    MultinomialCI,
     popdemo,
     popbio,
     purrr,

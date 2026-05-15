@@ -434,17 +434,32 @@ myfunc <- function(x){
   colnames(x) <- c("lcl", "ucl")
   x
 }
-# this doesn't give the same result as the beta distribution
-mnCI <- list(ci_95 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.05),
-             ci_80 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.2),
-             ci_50 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.5)) %>%
-  map(myfunc) %>%
-  map(as_data_frame) %>%
-  bind_rows(.id = "interval_width")%>%
-  mutate(p = rep(c(1, 7, 0, 3) / 11, times=3),
-         prior = factor("None", levels = c("None", "Uninformative", "RLT, w = 1", "RLT, w = 0.5N", "RLT, w = N")), 
-         transition =  factor(rep(c("s to s", "s to j", "s to a", "s to m"), times=3), levels = c("s to s", "s to j", "s to a", "s to m"))) %>%
-  filter(transition != "s to m")
+# this doesn't give the same result as the beta distribution.
+# MultinomialCI is in Suggests; if it is not installed (e.g. on a platform
+# where the CRAN binary is temporarily unavailable), fall back to an empty
+# data frame so the plot still renders without the multinomial CI overlay.
+if (requireNamespace("MultinomialCI", quietly = TRUE)) {
+  mnCI <- list(ci_95 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.05),
+               ci_80 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.2),
+               ci_50 = MultinomialCI::multinomialCI(c(1, 7, 0, 3), alpha = 0.5)) %>%
+    map(myfunc) %>%
+    map(as_data_frame) %>%
+    bind_rows(.id = "interval_width")%>%
+    mutate(p = rep(c(1, 7, 0, 3) / 11, times=3),
+           prior = factor("None", levels = c("None", "Uninformative", "RLT, w = 1", "RLT, w = 0.5N", "RLT, w = N")),
+           transition =  factor(rep(c("s to s", "s to j", "s to a", "s to m"), times=3), levels = c("s to s", "s to j", "s to a", "s to m"))) %>%
+    filter(transition != "s to m")
+} else {
+  message("MultinomialCI not installed; rendering plot without multinomial CI overlay.")
+  mnCI <- tibble(
+    interval_width = character(0),
+    lcl = numeric(0),
+    ucl = numeric(0),
+    p = numeric(0),
+    prior = factor(character(0), levels = c("None", "Uninformative", "RLT, w = 1", "RLT, w = 0.5N", "RLT, w = N")),
+    transition = factor(character(0), levels = c("s to s", "s to j", "s to a", "s to m"))
+  )
+}
 
 xx <- crossing(prior = c("None", "Uninformative", "RLT, w = 1", "RLT, w = 0.5N", "RLT, w = N"),
          transition = c("s to s", "s to j", "s to a", "s to m"),
