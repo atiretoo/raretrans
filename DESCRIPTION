@@ -1,7 +1,7 @@
 Type: Package
 Package: raretrans
 Title: Bayesian Priors for Matrix Population Models
-Version: 1.0.4
+Version: 1.0.4-9000
 Authors@R:
     c(person(given = "Raymond",
              family = "Tremblay",
@@ -55,7 +55,6 @@ Suggests:
     gridExtra,
     huxtable,
     knitr,
-    MultinomialCI,
     popdemo,
     popbio,
     purrr,

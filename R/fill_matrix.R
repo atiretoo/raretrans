@@ -20,14 +20,18 @@
 #'
 #' @examples
 #' # Build a simple 3-stage TF list (transition + fertility matrices)
-#' T_mat <- matrix(c(0.5, 0.3, 0.0,
-#'                   0.2, 0.4, 0.1,
-#'                   0.0, 0.1, 0.7), nrow = 3, ncol = 3)
-#' F_mat <- matrix(c(0.0, 0.0, 1.5,
-#'                   0.0, 0.0, 0.0,
-#'                   0.0, 0.0, 0.0), nrow = 3, ncol = 3)
+#' T_mat <- matrix(c(
+#'   0.5, 0.3, 0.0,
+#'   0.2, 0.4, 0.1,
+#'   0.0, 0.1, 0.7
+#' ), nrow = 3, ncol = 3)
+#' F_mat <- matrix(c(
+#'   0.0, 0.0, 1.5,
+#'   0.0, 0.0, 0.0,
+#'   0.0, 0.0, 0.0
+#' ), nrow = 3, ncol = 3)
 #' TF <- list(T = T_mat, F = F_mat)
-#' N  <- c(10, 5, 8)
+#' N <- c(10, 5, 8)
 #'
 #' # Default: return filled transition matrix T
 #' fill_transitions(TF, N)
@@ -100,22 +104,30 @@ fill_transitions <- function(TF, N, P = NULL, priorweight = -1, returnType = "T"
 #'
 #' @examples
 #' # Build a simple 3-stage TF list (transition + fertility matrices)
-#' T_mat <- matrix(c(0.5, 0.3, 0.0,
-#'                   0.2, 0.4, 0.1,
-#'                   0.0, 0.1, 0.7), nrow = 3, ncol = 3)
-#' F_mat <- matrix(c(0.0, 0.0, 1.5,
-#'                   0.0, 0.0, 0.0,
-#'                   0.0, 0.0, 0.0), nrow = 3, ncol = 3)
+#' T_mat <- matrix(c(
+#'   0.5, 0.3, 0.0,
+#'   0.2, 0.4, 0.1,
+#'   0.0, 0.1, 0.7
+#' ), nrow = 3, ncol = 3)
+#' F_mat <- matrix(c(
+#'   0.0, 0.0, 1.5,
+#'   0.0, 0.0, 0.0,
+#'   0.0, 0.0, 0.0
+#' ), nrow = 3, ncol = 3)
 #' TF <- list(T = T_mat, F = F_mat)
-#' N  <- c(10, 5, 8)
+#' N <- c(10, 5, 8)
 #'
 #' # Only adults (stage 3) reproduce; mark non-reproducing entries with NA
-#' alpha_mat <- matrix(c(NA, NA, 0.5,
-#'                       NA, NA, NA,
-#'                       NA, NA, NA), nrow = 3, ncol = 3)
-#' beta_mat  <- matrix(c(NA, NA, 1.0,
-#'                       NA, NA, NA,
-#'                       NA, NA, NA), nrow = 3, ncol = 3)
+#' alpha_mat <- matrix(c(
+#'   NA, NA, 0.5,
+#'   NA, NA, NA,
+#'   NA, NA, NA
+#' ), nrow = 3, ncol = 3)
+#' beta_mat <- matrix(c(
+#'   NA, NA, 1.0,
+#'   NA, NA, NA,
+#'   NA, NA, NA
+#' ), nrow = 3, ncol = 3)
 #'
 #' # Default: return filled fertility matrix F
 #' fill_fertility(TF, N, alpha = alpha_mat, beta = beta_mat)
@@ -158,7 +170,7 @@ fill_fertility <- function(TF, N, alpha = 0.00001, beta = 0.00001, priorweight =
   if ((all(N[reproducing_stages] > 0) | sum(beta, na.rm = TRUE) > 0)) {
     if (priorweight > 0) {
       alpha_post <- sweep(alpha, 2, N, FUN = "*") * priorweight + babies_next_year
-      beta_post <- sweep(beta, 2, N, FUN = "*") * priorweight + N
+      beta_post <- sweep(sweep(beta, 2, N, FUN = "*") * priorweight, 2, N, FUN = "+")
     } else {
       alpha_post <- alpha + babies_next_year
       beta_post <- sweep(beta, 2, N, FUN = "+")
@@ -220,25 +232,22 @@ get_state_vector <- function(transitions, stage = NULL,
 }
 
 check_TF <- function(TF) {
-
-  if(typeof(TF) != "list") {
+  if (typeof(TF) != "list") {
     stop("TF must be a list of 2 matrices with equal dimensions")
   }
-  if(length(TF) != 2) {
+  if (length(TF) != 2) {
     stop("TF must be a list of 2 matrices with equal dimensions")
   }
-  if(is.null(TF$T) || is.null(TF$F)) {
+  if (is.null(TF$T) || is.null(TF$F)) {
     stop("the matrices in TF must be named 'T' and 'F'")
   }
   Tmat <- TF$T
   Fmat <- TF$F
 
-  if(!identical(dim(Tmat), dim(Fmat))) {
+  if (!identical(dim(Tmat), dim(Fmat))) {
     stop("The transition matrix's dimensions don't match the fertility matrix's dimensions")
   }
-  if(dim(Tmat)[1] != dim(Tmat)[2]) {
+  if (dim(Tmat)[1] != dim(Tmat)[2]) {
     stop("T and F must be square matrices")
   }
-
 }
-
