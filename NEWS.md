@@ -1,3 +1,26 @@
+# raretrans 1.0.5
+
+## Bug fixes
+* `fill_fertility()`: fixed a vector-recycling bug where the `beta_post`
+  computation used `+ N` instead of `sweep(..., 2, N, FUN = "+")` when
+  `priorweight > 0`. The bug caused the `[seedling, parent]` β posterior
+  to pick up `N[seedling]` instead of `N[parent]`, inflating Gamma
+  posterior means (and hence λ) when `N[seedling]` was small or zero
+  (#5, #6). Thanks to Drew Tyre for the fix.
+
+## Vignettes
+* `transition_priors`: wrapped `MultinomialCI` calls in a `requireNamespace()`
+  guard so the vignette still builds when `MultinomialCI` is not installed
+  (e.g. when its CRAN macOS binary is temporarily unavailable).
+
+## DESCRIPTION
+* Removed `covr` from `Suggests`: no CI step uploaded coverage, so the
+  dependency was unused.
+
+## Internal
+* Regenerated reference objects for `sim_transitions()` tests to reflect
+  the corrected fertility posterior.
+
 # raretrans 1.0.4
 
 # raretrans 1.0.3
