@@ -12,3 +12,4 @@ vignettes/*.html
 /Meta/
 data-raw/*.rda
 raretrans/
+.positai

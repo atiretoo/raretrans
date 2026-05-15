@@ -31,14 +31,18 @@ matrix combining observed transitions for one time step and a prior
 }
 \examples{
 # Build a simple 3-stage TF list (transition + fertility matrices)
-T_mat <- matrix(c(0.5, 0.3, 0.0,
-                  0.2, 0.4, 0.1,
-                  0.0, 0.1, 0.7), nrow = 3, ncol = 3)
-F_mat <- matrix(c(0.0, 0.0, 1.5,
-                  0.0, 0.0, 0.0,
-                  0.0, 0.0, 0.0), nrow = 3, ncol = 3)
+T_mat <- matrix(c(
+  0.5, 0.3, 0.0,
+  0.2, 0.4, 0.1,
+  0.0, 0.1, 0.7
+), nrow = 3, ncol = 3)
+F_mat <- matrix(c(
+  0.0, 0.0, 1.5,
+  0.0, 0.0, 0.0,
+  0.0, 0.0, 0.0
+), nrow = 3, ncol = 3)
 TF <- list(T = T_mat, F = F_mat)
-N  <- c(10, 5, 8)
+N <- c(10, 5, 8)
 
 # Default: return filled transition matrix T
 fill_transitions(TF, N)
