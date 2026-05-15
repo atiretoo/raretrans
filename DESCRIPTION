@@ -49,7 +49,6 @@ Imports:
     stats
 Suggests:
     bslib,
-    covr,
     dplyr,
     formatR,
     gridExtra,
