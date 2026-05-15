@@ -5,8 +5,9 @@
 
 [![Project Status:
 Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/raretrans)](https://CRAN.R-project.org/package=raretrans)
 [![R-CMD-check](https://github.com/atiretoo/raretrans/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/atiretoo/raretrans/actions/workflows/R-CMD-check.yaml)
-[![codecov](https://codecov.io/gh/atiretoo/raretrans/branch/master/graph/badge.svg)](https://app.codecov.io/gh/atiretoo/raretrans)
 
 Functions to create matrix population models from a combination of data
 on stage/age transitions and Bayesian prior information. This
